@@ -104,6 +104,18 @@ nav {
     opacity: 0.9;
 }
 
+.main-quote {
+    font-size: 1.6rem;
+    font-style: italic;
+    color: #fff;
+    margin: 2rem 0 2.5rem 0;
+    text-align: center;
+    line-height: 1.6;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
 .cta-buttons {
     display: flex;
     gap: 1rem;
@@ -211,7 +223,7 @@ nav {
 
 /* Footer */
 footer {
-    background-color: var(--text-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     padding: 4rem 5% 2rem;
 }
