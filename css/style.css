@@ -469,6 +469,32 @@ footer {
     margin-bottom: 0.5rem;
 }
 
+.docs-sidebar nav ul li .sub-menu {
+    list-style: none;
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.docs-sidebar nav ul li:hover .sub-menu {
+    display: block;
+}
+
+.docs-sidebar nav ul li .sub-menu li {
+    margin-bottom: 0.3rem;
+}
+
+.docs-sidebar nav ul li .sub-menu a {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.docs-sidebar nav ul li .sub-menu a:hover {
+    color: var(--primary-color);
+}
+
 .docs-sidebar nav ul li a {
     display: block;
     padding: 0.5rem 1rem;
@@ -490,17 +516,50 @@ footer {
 
 .docs-content {
     flex: 1;
-    min-width: 0;
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: var(--background-color);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Markdown content styles */
-.docs-content h1 {
+.doc-section {
+    display: block;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background-color: var(--background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.doc-section h2 {
     font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.markdown-content {
+    display: block;
+    padding: 1rem;
+    background-color: var(--background-color);
+    border-radius: 4px;
+    line-height: 1.6;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.markdown-content h1 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
     margin-bottom: 2rem;
     color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color-light);
+    padding-bottom: 0.5rem;
 }
 
-.docs-content h2 {
+.markdown-content h2 {
     font-size: 2rem;
     margin: 2rem 0 1rem;
     color: var(--primary-color);
@@ -508,28 +567,36 @@ footer {
     padding-bottom: 0.5rem;
 }
 
-.docs-content h3 {
+.markdown-content h3 {
     font-size: 1.5rem;
     margin: 1.5rem 0 1rem;
     color: var(--primary-color);
 }
 
-.docs-content p {
-    margin-bottom: 1rem;
-    line-height: 1.6;
+.markdown-content h4 {
+    font-size: 1.3rem;
+    margin: 1.3rem 0 0.8rem;
+    color: var(--primary-color);
 }
 
-.docs-content ul, .docs-content ol {
+.markdown-content p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+.markdown-content ul, 
+.markdown-content ol {
     margin-bottom: 1rem;
     padding-left: 2rem;
 }
 
-.docs-content li {
+.markdown-content li {
     margin-bottom: 0.5rem;
     line-height: 1.6;
 }
 
-.docs-content pre {
+.markdown-content pre {
     background-color: #f5f5f5;
     border-radius: 4px;
     padding: 1rem;
@@ -537,7 +604,7 @@ footer {
     overflow-x: auto;
 }
 
-.docs-content code {
+.markdown-content code {
     font-family: 'Fira Code', monospace;
     font-size: 0.9rem;
     background-color: #f5f5f5;
@@ -545,12 +612,12 @@ footer {
     border-radius: 3px;
 }
 
-.docs-content pre code {
+.markdown-content pre code {
     background-color: transparent;
     padding: 0;
 }
 
-.docs-content blockquote {
+.markdown-content blockquote {
     border-left: 4px solid var(--primary-color);
     margin: 1rem 0;
     padding: 0.5rem 1rem;
@@ -558,40 +625,77 @@ footer {
     border-radius: 0 4px 4px 0;
 }
 
-.docs-content table {
+.markdown-content table {
     width: 100%;
     border-collapse: collapse;
     margin: 1rem 0;
 }
 
-.docs-content th, .docs-content td {
+.markdown-content th, 
+.markdown-content td {
     padding: 0.75rem;
     border: 1px solid #ddd;
 }
 
-.docs-content th {
+.markdown-content th {
     background-color: var(--primary-color-light);
     font-weight: bold;
 }
 
-.docs-content tr:nth-child(even) {
+.markdown-content tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-.docs-content img {
+.markdown-content img {
     max-width: 100%;
     height: auto;
     border-radius: 4px;
     margin: 1rem 0;
 }
 
-.docs-content .error {
+.markdown-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.markdown-content a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+.markdown-content .loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--light-text);
+}
+
+.markdown-content .error {
     color: #dc3545;
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
     padding: 1rem;
     border-radius: 4px;
     margin: 1rem 0;
+}
+
+/* Add some spacing between sections */
+.doc-section + .doc-section {
+    margin-top: 2rem;
+}
+
+/* Add a subtle hover effect to code blocks */
+.markdown-content pre:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Style inline code differently from block code */
+.markdown-content p code,
+.markdown-content li code {
+    background-color: #f5f5f5;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.9rem;
 }
 
 /* Responsive styles */
