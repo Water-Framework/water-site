@@ -82,7 +82,9 @@ nav {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.4), rgba(0, 73, 153, 0.4)), url('../images/home_page_back.png');
+    background-size: cover;
+    background-position: center;
     color: white;
     padding: 8rem 5% 4rem;
     text-align: center;
@@ -305,31 +307,33 @@ footer {
     padding-top: 80px;
 }
 
-.page-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+.getting-started-header {
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.4), rgba(0, 73, 153, 0.4)), url('../images/getting_started_page_back.jpeg');
+    background-size: cover;
+    background-position: center;
     color: white;
-    padding: 8rem 5% 4rem;
+    padding: 8rem 5% 4rem!important;
     text-align: center;
 }
 
-.page-header h1 {
+.getting-started-header h1 {
     font-size: 3.5rem;
     margin-bottom: 1rem;
 }
 
-.page-header p {
+.getting-started-header p {
     font-size: 1.5rem;
     opacity: 0.9;
 }
 
 .getting-started section {
-    padding: 2rem 5%;
+    padding: 4rem 5%;
     background-color: var(--light-background);
 }
 
 .getting-started section h2 {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
     font-size: 2.5rem;
     color: var(--text-color);
 }
@@ -337,7 +341,7 @@ footer {
 .requirements-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    gap: 2rem;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -368,9 +372,9 @@ footer {
 
 .step {
     background: white;
-    padding: 1.5rem;
+    padding: 2rem;
     border-radius: 8px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -406,7 +410,7 @@ footer {
 .next-steps-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: 2rem;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -613,10 +617,29 @@ footer {
     padding-top: 80px;
 }
 
+.news-header {
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.4), rgba(0, 73, 153, 0.4)), url('../images/news_page_back.jpeg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 8rem 5% 4rem;
+    text-align: center;
+}
+
+.news-header h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+.news-header p {
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
 .news-container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 5%;
+    padding: 4rem 5%;
 }
 
 .news-item {
