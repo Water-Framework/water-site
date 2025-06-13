@@ -308,22 +308,38 @@ footer {
 .page-header {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
-    padding: 4rem 5%;
+    padding: 8rem 5% 4rem;
     text-align: center;
 }
 
 .page-header h1 {
-    font-size: 3rem;
+    font-size: 3.5rem;
     margin-bottom: 1rem;
+}
+
+.page-header p {
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+.getting-started section {
+    padding: 2rem 5%;
+    background-color: var(--light-background);
+}
+
+.getting-started section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    color: var(--text-color);
 }
 
 .requirements-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 4rem 5%;
 }
 
 .requirement-card {
@@ -332,27 +348,36 @@ footer {
     border-radius: 8px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.requirement-card:hover {
+    transform: translateY(-5px);
 }
 
 .requirement-card i {
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: var(--primary-color);
     margin-bottom: 1rem;
 }
 
 .installation-steps {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 5%;
 }
 
 .step {
-    margin-bottom: 3rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .step h3 {
     color: var(--primary-color);
     margin-bottom: 1rem;
+    font-size: 1.5rem;
 }
 
 .step pre {
@@ -360,30 +385,28 @@ footer {
     padding: 1rem;
     border-radius: 4px;
     overflow-x: auto;
+    margin: 1rem 0;
 }
 
 .code-example {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 5%;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.code-example pre {
-    background: var(--light-background);
-    padding: 1rem;
-    border-radius: 4px;
-    overflow-x: auto;
-}
-
-.next-steps {
-    background: var(--light-background);
-    padding: 4rem 5%;
+.code-example h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
 }
 
 .next-steps-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -394,15 +417,22 @@ footer {
     border-radius: 8px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.next-step-card:hover {
+    transform: translateY(-5px);
 }
 
 .next-step-card h3 {
     color: var(--primary-color);
     margin-bottom: 1rem;
+    font-size: 1.5rem;
 }
 
 .next-step-card p {
     margin-bottom: 1.5rem;
+    color: var(--text-color);
 }
 
 /* Documentation Page */
