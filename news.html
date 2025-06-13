@@ -4,17 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News - Water Framework</title>
+    <meta name="description" content="Latest news and updates about the Water Framework">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
+    <!-- Header -->
     <header>
         <nav>
             <div class="logo">
                 <img src="images/water-logo.png" alt="Water Framework Logo">
                 <span>Water Framework</span>
             </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="getting-started.html">Getting Started</a></li>
@@ -24,6 +36,7 @@
         </nav>
     </header>
 
+    <!-- Main Content -->
     <main class="news">
         <section class="news-header">
             <h1>News & Updates</h1>
@@ -68,6 +81,7 @@
         </div>
     </main>
 
+    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-section">
@@ -85,9 +99,9 @@
             <div class="footer-section">
                 <h4>Connect</h4>
                 <div class="social-links">
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
                 </div>
             </div>
         </div>
@@ -95,7 +109,5 @@
             <p>&copy; 2024 Water Framework. All rights reserved.</p>
         </div>
     </footer>
-
-    <script src="js/main.js"></script>
 </body>
 </html> 

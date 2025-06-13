@@ -4,18 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Getting Started - Water Framework</title>
+    <meta name="description" content="Learn how to get started with the Water Framework, a modern Java framework for building enterprise applications">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
+    <!-- Header -->
     <header>
         <nav>
             <div class="logo">
                 <img src="images/water-logo.png" alt="Water Framework Logo">
                 <span>Water Framework</span>
             </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="getting-started.html" class="active">Getting Started</a></li>
@@ -25,96 +37,73 @@
         </nav>
     </header>
 
+    <!-- Main Content -->
     <main class="getting-started">
-        <section class="getting-started-header">
-            <h1>Getting Started</h1>
-            <p>Learn how to set up and start using Water Framework in your projects</p>
-        </section>
+        <div class="container">
+            <h1>Getting Started with Water Framework</h1>
+            
+            <section class="intro">
+                <h2>Introduction</h2>
+                <p>Welcome to Water Framework! This guide will help you get started with our framework and show you how to build your first application.</p>
+            </section>
 
-        <section class="requirements">
-            <h2>Requirements</h2>
-            <div class="requirements-grid">
-                <div class="requirement-card">
-                    <i class="fab fa-java"></i>
-                    <h3>Java 17+</h3>
-                    <p>Make sure you have Java 17 or later installed</p>
-                </div>
-                <div class="requirement-card">
-                    <i class="fas fa-code-branch"></i>
-                    <h3>Node.js 18.20.8+</h3>
-                    <p>Required for the Water generator</p>
-                </div>
-                <div class="requirement-card">
-                    <i class="fas fa-cogs"></i>
-                    <h3>Gradle</h3>
-                    <p>Build tool for Java projects</p>
-                </div>
-                <div class="requirement-card">
-                    <i class="fas fa-magic"></i>
-                    <h3>Yeoman</h3>
-                    <p>Required for generating Water Framework projects</p>
-                </div>
-            </div>
-        </section>
+            <section class="prerequisites">
+                <h2>Prerequisites</h2>
+                <ul>
+                    <li>Java 17 or higher</li>
+                    <li>Maven 3.6 or higher</li>
+                    <li>Your favorite IDE (IntelliJ IDEA, Eclipse, or VS Code)</li>
+                </ul>
+            </section>
 
-        <section class="installation">
-            <h2>Installation</h2>
-            <div class="installation-steps">
-                <div class="step">
-                    <h3>1. Install Node.js</h3>
-                    <p>If you're using NVM, switch to the required version:</p>
-                    <pre><code class="language-bash">nvm use 18.20.8</code></pre>
-                </div>
-                <div class="step">
-                    <h3>2. Install Water Generator</h3>
-                    <p>Install the Water generator globally:</p>
-                    <pre><code class="language-bash">npm install -g yo water-generator</code></pre>
-                </div>
-                <div class="step">
-                    <h3>3. Verify Installation</h3>
-                    <p>Check available commands:</p>
-                    <pre><code class="language-bash">yo water:help</code></pre>
-                </div>
-            </div>
-        </section>
+            <section class="installation">
+                <h2>Installation</h2>
+                <p>To get started, you'll need to add the Water Framework dependencies to your project.</p>
+                
+                <h3>Maven</h3>
+                <pre><code class="language-xml">
+&lt;dependency&gt;
+    &lt;groupId&gt;org.waterframework&lt;/groupId&gt;
+    &lt;artifactId&gt;water-core&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+                </code></pre>
 
-        <section class="quick-start">
-            <h2>Quick Start</h2>
-            <div class="code-example">
-                <h3>Create a New Project</h3>
-                <pre><code class="language-bash"># Create a new project
-yo water:new my-project
+                <h3>Gradle</h3>
+                <pre><code class="language-groovy">
+implementation 'org.waterframework:water-core:1.0.0'
+                </code></pre>
+            </section>
 
-# Navigate to project directory
-cd my-project
+            <section class="quick-start">
+                <h2>Quick Start</h2>
+                <p>Here's a simple example to get you started:</p>
+                
+                <pre><code class="language-java">
+import org.waterframework.core.WaterApplication;
+import org.waterframework.core.annotation.WaterComponent;
 
-# Build the project
-yo water:build-all</code></pre>
-            </div>
-        </section>
+@WaterComponent
+public class MyApplication {
+    public static void main(String[] args) {
+        WaterApplication.run(MyApplication.class, args);
+    }
+}
+                </code></pre>
+            </section>
 
-        <section class="next-steps">
-            <h2>Next Steps</h2>
-            <div class="next-steps-grid">
-                <div class="next-step-card">
-                    <h3>Learn Core Concepts</h3>
-                    <p>Understand the fundamental concepts of Water Framework</p>
-                    <a href="documentation.html#core-concepts" class="btn secondary">Read More</a>
-                </div>
-                <div class="next-step-card">
-                    <h3>Explore Examples</h3>
-                    <p>Check out example projects and tutorials</p>
-                    <a href="documentation.html#examples" class="btn secondary">View Examples</a>
-                </div>
-                <div class="next-step-card">
-                    <h3>Join Community</h3>
-                    <p>Get help and connect with other developers</p>
-                    <a href="#" class="btn secondary">Join Community</a>
-                </div>
-            </div>
-        </section>
+            <section class="next-steps">
+                <h2>Next Steps</h2>
+                <ul>
+                    <li>Check out our <a href="documentation.html">documentation</a> for detailed guides</li>
+                    <li>Explore our <a href="https://github.com/water-framework">GitHub repositories</a></li>
+                    <li>Join our <a href="#">community</a> for support and discussions</li>
+                </ul>
+            </section>
+        </div>
     </main>
 
+    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-section">
@@ -132,9 +121,9 @@ yo water:build-all</code></pre>
             <div class="footer-section">
                 <h4>Connect</h4>
                 <div class="social-links">
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
                 </div>
             </div>
         </div>
@@ -144,6 +133,5 @@ yo water:build-all</code></pre>
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="js/main.js"></script>
 </body>
 </html> 

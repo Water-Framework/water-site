@@ -3,13 +3,17 @@ const SELECTORS = {
     SIDEBAR: '.docs-sidebar',
     MENU_ITEMS: '.docs-sidebar nav ul > li > a',
     SUBMENU_ITEMS: '.docs-sidebar nav ul li .sub-menu a',
-    DOCS_CONTENT: '#docs-content'
+    DOCS_CONTENT: '#docs-content',
+    MOBILE_MENU_TOGGLE: '.mobile-menu-toggle',
+    NAV_LINKS: '.nav-links',
+    SIDEBAR_TOGGLE: '.sidebar-toggle'
 };
 
 const CLASSES = {
     SHOW_SUBMENU: 'show-submenu',
     LOADING: 'loading',
-    ERROR: 'error'
+    ERROR: 'error',
+    ACTIVE: 'active'
 };
 
 // Utility functions
@@ -31,8 +35,75 @@ const utils = {
         if (className) element.className = className;
         if (content) element.innerHTML = content;
         return element;
+    },
+
+    toggleClass: (element, className) => {
+        element.classList.toggle(className);
     }
 };
+
+// Mobile Manager class to handle mobile-specific functionality
+class MobileManager {
+    constructor() {
+        this.initializeMobileMenu();
+        this.initializeSidebarToggle();
+        this.initializeResizeHandler();
+    }
+
+    initializeMobileMenu() {
+        const menuToggle = utils.getElement(SELECTORS.MOBILE_MENU_TOGGLE);
+        const navLinks = utils.getElement(SELECTORS.NAV_LINKS);
+
+        menuToggle.addEventListener('click', () => {
+            utils.toggleClass(navLinks, CLASSES.ACTIVE);
+            utils.toggleClass(menuToggle, CLASSES.ACTIVE);
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('nav')) {
+                navLinks.classList.remove(CLASSES.ACTIVE);
+                menuToggle.classList.remove(CLASSES.ACTIVE);
+            }
+        });
+    }
+
+    initializeSidebarToggle() {
+        const sidebarToggle = utils.getElement(SELECTORS.SIDEBAR_TOGGLE);
+        const sidebar = utils.getElement(SELECTORS.SIDEBAR);
+
+        sidebarToggle.addEventListener('click', () => {
+            utils.toggleClass(sidebar, CLASSES.ACTIVE);
+            utils.toggleClass(sidebarToggle, CLASSES.ACTIVE);
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !e.target.closest(SELECTORS.SIDEBAR) && 
+                !e.target.closest(SELECTORS.SIDEBAR_TOGGLE)) {
+                sidebar.classList.remove(CLASSES.ACTIVE);
+                sidebarToggle.classList.remove(CLASSES.ACTIVE);
+            }
+        });
+    }
+
+    initializeResizeHandler() {
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 768) {
+                    // Reset mobile states when switching to desktop
+                    utils.getElement(SELECTORS.NAV_LINKS).classList.remove(CLASSES.ACTIVE);
+                    utils.getElement(SELECTORS.MOBILE_MENU_TOGGLE).classList.remove(CLASSES.ACTIVE);
+                    utils.getElement(SELECTORS.SIDEBAR).classList.remove(CLASSES.ACTIVE);
+                    utils.getElement(SELECTORS.SIDEBAR_TOGGLE).classList.remove(CLASSES.ACTIVE);
+                }
+            }, 250);
+        });
+    }
+}
 
 // Menu Manager class to handle all menu-related functionality
 class MenuManager {
@@ -253,4 +324,5 @@ class ContentLoader {
 document.addEventListener('DOMContentLoaded', () => {
     utils.log('DOM fully loaded');
     new MenuManager();
+    new MobileManager();
 });
