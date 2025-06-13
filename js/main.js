@@ -60,21 +60,33 @@ document.addEventListener('DOMContentLoaded', () => {
         // Function to load and render Markdown content
         async function loadMarkdownContent(mdFile) {
             try {
+                console.log('=== loadMarkdownContent START ===');
+                console.log('Loading markdown file:', mdFile);
+                
+                const docsContent = document.getElementById('docs-content');
+                docsContent.innerHTML = '<div class="loading">Loading content...</div>';
+                
                 const response = await fetch(`content/${mdFile}`);
+                console.log('Fetch response status:', response.status);
                 if (!response.ok) {
-                    throw new Error(`Failed to load ${mdFile}`);
+                    throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
                 }
-                const markdown = await response.text();
-                displayMarkdownContent(markdown)
-
-                // Apply syntax highlighting to code blocks
-                document.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightBlock(block);
-                });
+                const text = await response.text();
+                console.log('Content received:', text.substring(0, 200) + '...');
+                if (!text) {
+                    throw new Error('Received empty content');
+                }
+                // Use the display function to show the content
+                displayMarkdownContent(text);
             } catch (error) {
-                console.error('Error loading documentation:', error);
-                docsContent.innerHTML = `<div class="error">Error loading documentation: ${error.message}</div>`;
+                console.error('Error in loadMarkdownContent:', error);
+                const docsContent = document.getElementById('docs-content');
+                docsContent.innerHTML = `<div class="error">
+                    Failed to load content: ${error.message}<br>
+                    File: ${mdFile}
+                </div>`;
             }
+            console.log('=== loadMarkdownContent END ===');
         }
 
         // Handle documentation navigation
@@ -107,16 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Initialize when the DOM is ready
+// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded');
+    console.log('DOM fully loaded');
     initializeDocumentation();
 });
 
 // Main initialization function
 function initializeDocumentation() {
+    console.log('Initializing documentation...');
+    
     // Get all submenu links
-    const subMenuLinks = document.querySelectorAll('.sub-menu a');
+    const subMenuLinks = document.querySelectorAll('.docs-sidebar nav ul li .sub-menu a');
     console.log('Found submenu links:', subMenuLinks.length);
     
     // Add click handler to each submenu link
@@ -139,22 +153,72 @@ function initializeDocumentation() {
             
             // Load remote markdown content
             loadRemoteMarkdownContent(this);
+            
+            // Keep only the current submenu open
+            const currentSubmenu = this.closest('.sub-menu');
+            const parentLi = currentSubmenu.parentElement;
+            parentLi.classList.add('show-submenu');
         });
     });
 
     // Add click handlers to top menu items
-    const topMenuLinks = document.querySelectorAll('.docs-nav > ul > li > a[data-md]');
+    const topMenuLinks = document.querySelectorAll('.docs-sidebar nav ul > li > a');
+    console.log('Found top menu links:', topMenuLinks.length);
+    
     topMenuLinks.forEach(link => {
+        console.log('Adding click handler to top menu:', link.textContent);
+        
         link.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             console.log('Top menu click on:', this.textContent);
-            console.log('Data MD:', this.getAttribute('data-md'));
             
-            // Load local markdown content
-            loadMarkdownContent(this.getAttribute('data-md'));
+            // If it has data-md attribute, load local content
+            if (this.hasAttribute('data-md')) {
+                console.log('Data MD:', this.getAttribute('data-md'));
+                loadMarkdownContent(this.getAttribute('data-md'));
+            }
+            
+            // Handle submenu visibility
+            const parentLi = this.parentElement;
+            const subMenu = parentLi.querySelector('.sub-menu');
+            
+            if (subMenu) {
+                console.log('Found submenu for:', this.textContent);
+                // Close only sibling submenus at the same level
+                const siblings = Array.from(parentLi.parentElement.children);
+                siblings.forEach(sibling => {
+                    if (sibling !== parentLi && sibling.querySelector('.sub-menu')) {
+                        sibling.classList.remove('show-submenu');
+                    }
+                });
+                
+                // Toggle show-submenu class on current item
+                parentLi.classList.toggle('show-submenu');
+                console.log('Submenu visibility toggled:', parentLi.classList.contains('show-submenu'));
+            } else {
+                console.log('No submenu found for:', this.textContent);
+                // If clicked on a non-submenu item, close only sibling submenus
+                const siblings = Array.from(parentLi.parentElement.children);
+                siblings.forEach(sibling => {
+                    if (sibling !== parentLi && sibling.querySelector('.sub-menu')) {
+                        sibling.classList.remove('show-submenu');
+                    }
+                });
+            }
         });
+    });
+
+    // Add click handler to document to close submenus when clicking outside
+    document.addEventListener('click', function(e) {
+        // Check if the click is outside the docs-sidebar
+        if (!e.target.closest('.docs-sidebar')) {
+            console.log('Click outside sidebar, closing all submenus');
+            document.querySelectorAll('.docs-sidebar nav ul > li').forEach(item => {
+                item.classList.remove('show-submenu');
+            });
+        }
     });
 }
 
@@ -195,108 +259,37 @@ function displayMarkdownContent(content) {
     }
 }
 
-// Function to load local markdown content
-function loadMarkdownContent(mdFile) {
-    try {
-        console.log('=== loadMarkdownContent START ===');
-        console.log('Loading markdown file:', mdFile);
-        
-        // Get the docs content container
-        const docsContent = document.getElementById('docs-content');
-        
-        // Show loading state
-        docsContent.innerHTML = '<div class="loading">Loading content...</div>';
-
-        // Fetch and process content
-        fetch(mdFile)
-            .then(response => {
-                console.log('Fetch response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
-                }
-                return response.text();
-            })
-            .then(text => {
-                console.log('Content received:', text.substring(0, 200) + '...');
-                if (!text) {
-                    throw new Error('Received empty content');
-                }
-                // Use the display function to show the content
-                displayMarkdownContent(text);
-            })
-            .catch(error => {
-                console.error('Error loading content:', error);
-                docsContent.innerHTML = `<div class="error">
-                    Failed to load content: ${error.message}<br>
-                    File: ${mdFile}
-                </div>`;
-            });
-
-        console.log('=== loadMarkdownContent END ===');
-    } catch (error) {
-        console.error('Error in loadMarkdownContent:', error);
-    }
-}
-
 // Function to load remote markdown content
-function loadRemoteMarkdownContent(element) {
+async function loadRemoteMarkdownContent(element) {
     try {
         console.log('=== loadRemoteMarkdownContent START ===');
-        console.log('Element:', element);
-        console.log('Element href:', element.href);
+        const contentUrl = element.getAttribute('remote-md');
+        console.log('Loading remote content from:', contentUrl);
         
-        const remoteMdPath = element.getAttribute('remote-md');
-        console.log('remoteMdPath:', remoteMdPath);
-        
-        if (!remoteMdPath) {
-            console.error('No remote-md attribute specified');
-            const docsContent = document.getElementById('docs-content');
-            docsContent.innerHTML = '<div class="error">No remote-md attribute specified</div>';
-            return;
-        }
-        
-        // Get the docs content container
         const docsContent = document.getElementById('docs-content');
-        
-        // Show loading state
         docsContent.innerHTML = '<div class="loading">Loading content...</div>';
-
-        // Convert GitHub blob URL to raw content URL
-        const contentUrl = remoteMdPath
-            .replace('github.com', 'raw.githubusercontent.com')
-            .replace('/blob/', '/');
-
-        console.log('Fetching content from:', contentUrl);
         
-        // Fetch and process content
-        fetch(contentUrl)
-            .then(response => {
-                console.log('Fetch response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
-                }
-                return response.text();
-            })
-            .then(text => {
-                console.log('Content received:', text.substring(0, 200) + '...');
-                if (!text) {
-                    throw new Error('Received empty content');
-                }
-                // Use the display function to show the content
-                displayMarkdownContent(text);
-            })
-            .catch(error => {
-                console.error('Error loading content:', error);
-                docsContent.innerHTML = `<div class="error">
-                    Failed to load content: ${error.message}<br>
-                    URL: ${contentUrl}
-                </div>`;
-            });
-
-        console.log('=== loadRemoteMarkdownContent END ===');
+        const response = await fetch(contentUrl);
+        console.log('Fetch response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+        }
+        const text = await response.text();
+        console.log('Content received:', text.substring(0, 200) + '...');
+        if (!text) {
+            throw new Error('Received empty content');
+        }
+        // Use the display function to show the content
+        displayMarkdownContent(text);
     } catch (error) {
         console.error('Error in loadRemoteMarkdownContent:', error);
+        const docsContent = document.getElementById('docs-content');
+        docsContent.innerHTML = `<div class="error">
+            Failed to load content: ${error.message}<br>
+            URL: ${contentUrl}
+        </div>`;
     }
+    console.log('=== loadRemoteMarkdownContent END ===');
 }
 
 // Function to highlight code blocks
@@ -309,4 +302,4 @@ function highlightCodeBlocks(container) {
     } catch (error) {
         console.error('Error in highlightCodeBlocks:', error);
     }
-} 
+}

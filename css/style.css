@@ -476,8 +476,14 @@ footer {
     display: none;
 }
 
+/* Remove hover-based visibility */
 .docs-sidebar nav ul li:hover .sub-menu {
-    display: block;
+    display: none;
+}
+
+/* Add class for showing submenu */
+.docs-sidebar nav ul li.show-submenu .sub-menu {
+    display: block !important;
 }
 
 .docs-sidebar nav ul li .sub-menu li {
@@ -489,10 +495,31 @@ footer {
     color: var(--light-text);
     text-decoration: none;
     transition: color 0.3s ease;
+    padding: 5px 10px;
+    display: block;
 }
 
 .docs-sidebar nav ul li .sub-menu a:hover {
     color: var(--primary-color);
+    background-color: var(--hover-color);
+}
+
+/* Style for the Modules menu item */
+.docs-sidebar nav ul li > a[href="#modules"] {
+    cursor: pointer;
+    position: relative;
+}
+
+/* Add a visual indicator for submenu items */
+.docs-sidebar nav ul li > a[href="#modules"]::after {
+    content: '▼';
+    font-size: 0.8em;
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+}
+
+.docs-sidebar nav ul li.show-submenu > a[href="#modules"]::after {
+    transform: rotate(180deg);
 }
 
 .docs-sidebar nav ul li a {
@@ -897,4 +924,45 @@ footer {
     .video-info {
         text-align: center;
     }
+}
+
+.docs-nav .sub-menu {
+    display: none;
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+.docs-nav .sub-menu a {
+    display: block;
+    padding: 8px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.docs-nav .sub-menu a:hover {
+    color: var(--primary-color);
+    background-color: var(--hover-color);
+}
+
+/* Remove hover-based submenu visibility */
+.docs-nav li:hover .sub-menu {
+    display: none;
+}
+
+/* Add active state for submenu items */
+.docs-nav .sub-menu a.active {
+    color: var(--primary-color);
+    background-color: var(--hover-color);
+}
+
+/* Add active state for parent menu items */
+.docs-nav li.active > a {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.docs-nav li.active .sub-menu {
+    display: block;
 } 
