@@ -109,6 +109,19 @@ class MobileManager {
 class MenuManager {
     constructor() {
         this.initializeEventListeners();
+        this.initializeDefaultSection();
+    }
+
+    initializeDefaultSection() {
+        // Find and highlight the Core Concepts section by default
+        const coreConceptsLink = utils.getElement('a[href="#core-concepts"]');
+        if (coreConceptsLink) {
+            coreConceptsLink.classList.add(CLASSES.ACTIVE);
+            // Load the core concepts content
+            if (coreConceptsLink.hasAttribute('data-md')) {
+                ContentLoader.loadLocalContent(coreConceptsLink.getAttribute('data-md'));
+            }
+        }
     }
 
     initializeEventListeners() {
@@ -146,6 +159,13 @@ class MenuManager {
         utils.log('Direct click on:', link.textContent);
         utils.log('Remote MD:', link.getAttribute('remote-md'));
         
+        // Remove active class from all menu items
+        utils.getElements(SELECTORS.MENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
+        utils.getElements(SELECTORS.SUBMENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
+        
+        // Add active class to clicked item
+        link.classList.add(CLASSES.ACTIVE);
+        
         // Load remote markdown content
         ContentLoader.loadRemoteContent(link);
         
@@ -175,6 +195,13 @@ class MenuManager {
         e.stopPropagation();
         
         utils.log('Top menu click on:', link.textContent);
+        
+        // Remove active class from all menu items
+        utils.getElements(SELECTORS.MENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
+        utils.getElements(SELECTORS.SUBMENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
+        
+        // Add active class to clicked item
+        link.classList.add(CLASSES.ACTIVE);
         
         // If it has data-md attribute, load local content
         if (link.hasAttribute('data-md')) {
