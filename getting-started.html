@@ -49,47 +49,102 @@
 
             <section class="prerequisites">
                 <h2>Prerequisites</h2>
+                <p>Before you begin, make sure you have the following tools installed on your system:</p>
                 <ul>
-                    <li>Java 17 or higher</li>
-                    <li>Maven 3.6 or higher</li>
-                    <li>Your favorite IDE (IntelliJ IDEA, Eclipse, or VS Code)</li>
+                    <li><strong>Java 17 or higher</strong> - Required for running Water Framework applications</li>
+                    <li><strong>Gradle</strong> - For building and managing your project dependencies</li>
+                    <li><strong>Node.js</strong> - Required for the Water Generator tool</li>
+                    <li><strong>Yeoman</strong> - For scaffolding new Water Framework projects</li>
                 </ul>
+                <p>To install Yeoman and the Water Generator, run the following commands:</p>
+                <pre><code class="language-bash">
+npm install -g yo
+npm install -g generator-water --registry https://nexus.acsoftware.it/nexus/repository/npm-acs-public-repo
+                </code></pre>
             </section>
 
             <section class="installation">
-                <h2>Installation</h2>
-                <p>To get started, you'll need to add the Water Framework dependencies to your project.</p>
+                <h2>Creating Your First Project</h2>
+                <p>To create a new Water Framework project, follow these steps:</p>
                 
-                <h3>Maven</h3>
-                <pre><code class="language-xml">
-&lt;dependency&gt;
-    &lt;groupId&gt;org.waterframework&lt;/groupId&gt;
-    &lt;artifactId&gt;water-core&lt;/artifactId&gt;
-    &lt;version&gt;1.0.0&lt;/version&gt;
-&lt;/dependency&gt;
+                <h3>1. Generate a New Project</h3>
+                <p>First, make sure you're in your workspace folder (not inside any project folder). Then run the following command:</p>
+                <pre><code class="language-bash">
+yo water:new-project
                 </code></pre>
-
-                <h3>Gradle</h3>
-                <pre><code class="language-groovy">
-implementation 'org.waterframework:water-core:1.0.0'
-                </code></pre>
-            </section>
-
-            <section class="quick-start">
-                <h2>Quick Start</h2>
-                <p>Here's a simple example to get you started:</p>
                 
-                <pre><code class="language-java">
-import org.waterframework.core.WaterApplication;
-import org.waterframework.core.annotation.WaterComponent;
+                <p>The generator will prompt you for some basic information about your project:</p>
+                <ul>
+                    <li>Project name</li>
+                    <li>Base package name</li>
+                    <li>Framework selection (Spring, OSGi, Quarkus, etc.)</li>
+                    <li>Additional modules to include</li>
+                </ul>
 
-@WaterComponent
-public class MyApplication {
-    public static void main(String[] args) {
-        WaterApplication.run(MyApplication.class, args);
-    }
-}
+                <h3>2. Project Structure</h3>
+                <p>After generation, your project will follow a modular structure with the following components:</p>
+                <pre><code class="language-plaintext">
+your-project/
+├── your-project-api/           # API interfaces and models
+├── your-project-model/         # Data models and entities
+├── your-project-service/       # Core business logic
+├── your-project-service-integration/  # Integration layer
+├── your-project-service-spring/       # Spring-specific implementation
+├── build.gradle               # Main build file
+├── settings.gradle           # Project settings
+└── gradle.properties         # Gradle properties
                 </code></pre>
+
+                <h3>Module Organization</h3>
+                <ul>
+                    <li><strong>API Module</strong>: Contains interfaces and contracts that define your module's public API</li>
+                    <li><strong>Model Module</strong>: Contains data models, entities, and DTOs</li>
+                    <li><strong>Service Module</strong>: Implements the core business logic</li>
+                    <li><strong>Service Integration Module</strong>: Handles integration with other services and external systems</li>
+                    <li><strong>Service Spring Module</strong>: Provides Spring-specific implementations and REST endpoints</li>
+                </ul>
+
+                <h3>REST Compatibility Note</h3>
+                <p>For REST compatibility, the generator creates a separate Spring service project. This is necessary because Spring does not automatically support JAX-RS annotations. The Spring service module will handle:</p>
+                <ul>
+                    <li>REST endpoint implementations</li>
+                    <li>Spring-specific configurations</li>
+                    <li>JAX-RS to Spring REST mapping</li>
+                </ul>
+
+                <h3>3. Running Your Project</h3>
+                <p>There are several ways to run your Water Framework project:</p>
+
+                <h4>Option 1: Run as Spring Application</h4>
+                <p>To run the project as a standalone Spring application:</p>
+                <pre><code class="language-bash">
+./gradlew :your-project-service-spring:run
+                </code></pre>
+
+                <h4>Option 2: Deploy to OSGi Container</h4>
+                <p>To deploy your module to an OSGi container like Karaf:</p>
+                <ol>
+                    <li>Navigate to your workspace folder (where all your projects are located)</li>
+                    <li>Build the project using the Water Generator:
+                        <pre><code class="language-bash">
+yo water:build
+                        </code></pre>
+                    </li>
+                    <li>Copy the generated bundles to your OSGi container's deploy directory</li>
+                    <li>Start your OSGi container</li>
+                </ol>
+
+                <h4>Option 3: Run Tests</h4>
+                <p>To run the generated tests using the Water Generator:</p>
+                <p>Make sure you're in your workspace folder, then run:</p>
+                <pre><code class="language-bash">
+yo water:build --withTests
+                </code></pre>
+                <p>For more detailed test reports:</p>
+                <pre><code class="language-bash">
+yo water:build --withTests --info
+                </code></pre>
+
             </section>
 
             <section class="next-steps">
