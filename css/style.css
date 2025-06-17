@@ -192,6 +192,49 @@ nav {
     color: var(--text-color);
 }
 
+/* Out of Box Features Category Styling */
+.feature-category {
+    margin-bottom: 3rem;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.category-header i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-right: 1rem;
+}
+
+.category-title {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin: 0;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Responsive adjustments for category headers */
+@media (max-width: 768px) {
+    .category-header {
+        margin-bottom: 1rem;
+    }
+    
+    .category-header i {
+        font-size: 1.25rem;
+    }
+    
+    .category-title {
+        font-size: 1.25rem;
+    }
+}
+
 /* Core Concepts Section */
 .core-concepts {
     padding: 4rem 5%;
@@ -304,139 +347,96 @@ footer {
 
 /* Getting Started Page */
 .getting-started {
-    padding-top: 80px;
+    padding: 8rem 5% 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.getting-started-header {
-    background: linear-gradient(135deg, rgba(0, 102, 204, 0.4), rgba(0, 73, 153, 0.4)), url('../images/getting_started_page_back.jpeg');
-    background-size: cover;
-    background-position: center;
-    color: white;
-    padding: 8rem 5% 4rem!important;
+.getting-started h1 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 2rem;
     text-align: center;
-}
-
-.getting-started-header h1 {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-}
-
-.getting-started-header p {
-    font-size: 1.5rem;
-    opacity: 0.9;
 }
 
 .getting-started section {
-    padding: 4rem 5%;
-    background-color: var(--light-background);
+    margin-bottom: 3rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .getting-started section h2 {
-    text-align: center;
-    margin-bottom: 3rem;
-    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.getting-started section h3 {
     color: var(--text-color);
+    margin: 1.5rem 0 1rem;
+    font-size: 1.4rem;
 }
 
-.requirements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+.getting-started section p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
 }
 
-.requirement-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
-}
-
-.requirement-card:hover {
-    transform: translateY(-5px);
-}
-
-.requirement-card i {
-    font-size: 2.5rem;
-    color: var(--primary-color);
+.getting-started section ul {
+    list-style-position: inside;
     margin-bottom: 1rem;
 }
 
-.installation-steps {
-    max-width: 1200px;
-    margin: 0 auto;
+.getting-started section ul li {
+    margin-bottom: 0.5rem;
 }
 
-.step {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.step h3 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
-
-.step pre {
+.getting-started pre {
     background: var(--light-background);
-    padding: 1rem;
-    border-radius: 4px;
+    padding: 1.5rem;
+    border-radius: 6px;
     overflow-x: auto;
     margin: 1rem 0;
 }
 
-.code-example {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.getting-started code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
 }
 
-.code-example h3 {
+.getting-started a {
     color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
 }
 
-.next-steps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+.getting-started a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
 }
 
-.next-step-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
-}
-
-.next-step-card:hover {
-    transform: translateY(-5px);
-}
-
-.next-step-card h3 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
-
-.next-step-card p {
-    margin-bottom: 1.5rem;
-    color: var(--text-color);
+@media (max-width: 768px) {
+    .getting-started {
+        padding: 6rem 5% 2rem;
+    }
+    
+    .getting-started h1 {
+        font-size: 2rem;
+    }
+    
+    .getting-started section {
+        padding: 1.5rem;
+    }
+    
+    .getting-started section h2 {
+        font-size: 1.5rem;
+    }
+    
+    .getting-started section h3 {
+        font-size: 1.2rem;
+    }
 }
 
 /* Documentation Page */
