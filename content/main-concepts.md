@@ -242,6 +242,537 @@ yo water:app
 
 In minutes, you'll have a fully functional application with user management, security, document handling, and REST APIs - ready for production deployment.
 
+## Service Architecture
+
+Water Framework's service architecture is built around a clear hierarchy of service types that enable dependency injection, framework interceptors, and automatic permission management. Every service in the framework must implement the `it.water.core.api.service.Service` interface, which serves as the foundation for all framework interactions.
+
+### Service Hierarchy and Foundation
+
+The `Service` interface is the root of all Water Framework services:
+
+```java
+public interface Service {
+    // Marker interface that enables framework interactions
+}
+```
+
+This simple interface enables:
+- **Dependency Injection**: Framework can inject dependencies into any service
+- **Interceptor Support**: Method interception for cross-cutting concerns
+- **Component Registration**: Automatic discovery and registration in the component registry
+- **Lifecycle Management**: Framework-managed service lifecycle
+
+### Service Types and Their Purposes
+
+Water Framework defines three main service types, each serving specific purposes:
+
+#### 1. **BaseApi - Public Application Services**
+
+`BaseApi` extends `Service` and represents public application services that are exposed to external applications and require permission checking:
+
+```java
+public interface BaseApi extends Service {
+    // Public API services with automatic permission checking
+}
+```
+
+**Key Characteristics:**
+- **Permission Checking**: All methods automatically check user permissions
+- **Public Interface**: Exposed to external applications and REST endpoints
+- **Security Enforced**: Framework automatically validates permissions before method execution
+- **CRUD Operations**: Can be associated with persistence or be stateless
+
+**Example Implementation:**
+```java
+@FrameworkComponent
+public class TestEntityServiceImpl extends BaseEntityServiceImpl<TestEntity> 
+    implements TestEntityApi {
+
+    @Inject
+    private TestEntitySystemApi testEntitySystemApi;
+
+    @Inject
+    private ComponentRegistry waterComponentRegistry;
+
+    public TestEntityServiceImpl() {
+        super(TestEntity.class);
+    }
+
+    @Override
+    protected BaseEntitySystemApi<TestEntity> getSystemService() {
+        return testEntitySystemApi;
+    }
+
+    @Override
+    protected ComponentRegistry getComponentRegistry() {
+        return waterComponentRegistry;
+    }
+}
+```
+
+#### 2. **BaseSystemApi - Internal Framework Services**
+
+`BaseSystemApi` extends `Service` and represents internal framework services that bypass permission checking:
+
+```java
+public interface BaseSystemApi extends Service {
+    // Internal system services without permission checking
+}
+```
+
+**Key Characteristics:**
+- **No Permission Checking**: Methods execute without permission validation
+- **Internal Use**: Used by framework components and other services
+- **Performance Optimized**: Faster execution due to no permission overhead
+- **Framework Integration**: Can be associated with persistence or be stateless
+
+**Example Implementation:**
+```java
+@FrameworkComponent
+public class TestEntitySystemServiceImpl extends BaseEntitySystemServiceImpl<TestEntity> 
+    implements TestEntitySystemApi {
+
+    @Inject
+    private TestEntityRepository testEntityRepository;
+
+    public TestEntitySystemServiceImpl() {
+        super(TestEntity.class);
+    }
+
+    @Override
+    protected BaseRepository<TestEntity> getRepository() {
+        return testEntityRepository;
+    }
+
+    @Override
+    protected void validate(Resource resource) {
+        // Custom validation logic
+        super.validate(resource);
+    }
+}
+```
+
+#### 3. **RestApi - HTTP Endpoint Interfaces**
+
+`RestApi` extends `Service` and represents REST service interfaces that are automatically exposed as HTTP endpoints:
+
+```java
+public interface RestApi extends Service {
+    // REST API interfaces for HTTP exposure
+}
+```
+
+**Key Characteristics:**
+- **HTTP Exposure**: Automatically exposed as REST endpoints
+- **Permission Required**: Must use `BaseApi` services, never `BaseSystemApi`
+- **Content Negotiation**: Automatic JSON/XML serialization
+- **Security Integration**: Built-in security filters and CORS support
+
+**Example Implementation:**
+```java
+@Path("/test")
+@FrameworkRestApi
+public interface TestEntityRestApi extends RestApi {
+    
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    TestEntity find(@PathParam("id") long id);
+    
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    TestEntity save(TestEntity entity);
+}
+```
+
+### Entity Service Hierarchy
+
+For entity-based services, Water Framework provides specialized interfaces:
+
+#### **BaseEntityApi vs BaseEntitySystemApi**
+
+Both interfaces provide the same CRUD operations but with different permission behaviors:
+
+```java
+// Public API with permission checking
+public interface BaseEntityApi<T extends BaseEntity> extends BaseApi {
+    T save(T entity);
+    T update(T entity);
+    void remove(long id);
+    T find(long id);
+    T find(Query filter);
+    PaginableResult<T> findAll(Query filter, int delta, int page, QueryOrder queryOrder);
+    long countAll(Query filter);
+    Class<T> getEntityType();
+}
+
+// System API without permission checking
+public interface BaseEntitySystemApi<T extends BaseEntity> extends BaseSystemApi {
+    // Same methods as BaseEntityApi but no permission checking
+    T save(T entity);
+    T update(T entity);
+    void remove(long id);
+    T find(long id);
+    T find(Query filter);
+    PaginableResult<T> findAll(Query filter, int delta, int page, QueryOrder queryOrder);
+    long countAll(Query filter);
+    Class<T> getEntityType();
+    QueryBuilder getQueryBuilderInstance(); // Additional method for query building
+}
+```
+
+### Automatic CRUD Operations and Default Permissions
+
+Water Framework automatically exposes and manages CRUD operations with default permissions. When you create an entity service, the framework automatically:
+
+#### **1. Default CRUD Actions**
+The framework automatically creates these actions for every entity:
+- `SAVE` - Create new entities
+- `UPDATE` - Modify existing entities  
+- `REMOVE` - Delete entities
+- `FIND` - Retrieve single entities
+- `FIND_ALL` - Retrieve multiple entities
+
+#### **2. Automatic Permission Registration**
+The `@AccessControl` annotation defines the **default behavior** for entity permissions. The framework reads these annotations at startup and automatically sets up roles with the specified permissions, but only if those roles don't already exist in the system.
+
+```java
+@Entity
+@AccessControl(availableActions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL, CrudActions.REMOVE},
+        rolesPermissions = {
+                @DefaultRoleAccess(roleName = "manager", actions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL, CrudActions.REMOVE}),
+                @DefaultRoleAccess(roleName = "viewer", actions = {CrudActions.FIND, CrudActions.FIND_ALL}),
+                @DefaultRoleAccess(roleName = "editor", actions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL})
+        })
+public class TestEntity implements ProtectedEntity {
+    // Entity implementation
+}
+```
+
+**How Default Permission Setup Works:**
+
+1. **Startup Analysis**: During application startup, the framework scans all entities with `@AccessControl` annotations
+2. **Role Existence Check**: For each role defined in `@DefaultRoleAccess`, the framework checks if the role already exists in the system
+3. **Conditional Setup**: 
+   - **If role exists**: The framework does nothing - existing permissions are preserved
+   - **If role doesn't exist**: The framework automatically creates the role and assigns the specified permissions
+4. **Default Behavior**: This ensures that applications have sensible default permissions while allowing administrators to customize permissions without losing their changes
+
+**Example: Role Lifecycle**
+
+```java
+// At first startup - roles don't exist
+@AccessControl(availableActions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL, CrudActions.REMOVE},
+        rolesPermissions = {
+                @DefaultRoleAccess(roleName = "document_manager", actions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL, CrudActions.REMOVE}),
+                @DefaultRoleAccess(roleName = "document_viewer", actions = {CrudActions.FIND, CrudActions.FIND_ALL})
+        })
+public class Document implements ProtectedEntity {
+    // Entity implementation
+}
+```
+
+**First Startup Behavior:**
+- Framework creates `document_manager` role with full CRUD permissions
+- Framework creates `document_viewer` role with read-only permissions
+- These become the default permissions for the Document entity
+
+**Subsequent Startup Behavior:**
+- If roles already exist, framework preserves existing permissions
+- Administrators can modify permissions through the admin interface
+- Custom permission changes are never overwritten by the annotation
+
+**Benefits of This Approach:**
+
+- **Safe Defaults**: Applications start with sensible security defaults
+- **Non-Destructive**: Existing permission configurations are never overwritten
+- **Administrative Control**: Admins can customize permissions without code changes
+- **Development Friendly**: Developers can define expected permission structure in code
+- **Production Safe**: Permission changes in production persist across restarts
+
+**Advanced Usage:**
+```java
+@Entity
+@AccessControl(availableActions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL, CrudActions.REMOVE, ShareAction.SHARE},
+        rolesPermissions = {
+                // Manager role with full access including sharing
+                @DefaultRoleAccess(roleName = "project_manager", actions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL, CrudActions.REMOVE, ShareAction.SHARE}),
+                // Editor role with limited access
+                @DefaultRoleAccess(roleName = "project_editor", actions = {CrudActions.SAVE, CrudActions.UPDATE, CrudActions.FIND, CrudActions.FIND_ALL}),
+                // Viewer role with read-only access
+                @DefaultRoleAccess(roleName = "project_viewer", actions = {CrudActions.FIND, CrudActions.FIND_ALL})
+        })
+public class Project implements ProtectedEntity, SharedEntity {
+    // Project entity with sharing capabilities
+}
+```
+
+This approach ensures that Water Framework applications have secure, sensible defaults while maintaining the flexibility to customize permissions as needed for specific business requirements.
+
+#### **3. Method-Level Permission Enforcement**
+While `@AccessControl` defines default entity permissions, developers must explicitly use permission annotations in their API services to ensure that permission checking occurs before method execution. The framework provides several annotations for different permission scenarios:
+
+**Core Permission Annotations:**
+
+```java
+@Service
+public class DocumentApi extends BaseEntityApi<Document> {
+    
+    // Check if user has SAVE permission for Document entity
+    @AllowPermission(action = CrudActions.SAVE)
+    public Document createDocument(Document document) {
+        return super.save(document);
+    }
+    
+    // Check if user has UPDATE permission for Document entity
+    @AllowPermission(action = CrudActions.UPDATE)
+    public Document updateDocument(Document document) {
+        return super.update(document);
+    }
+    
+    // Check if user has FIND permission for Document entity
+    @AllowPermission(action = CrudActions.FIND)
+    public Document findDocument(String id) {
+        return super.find(id);
+    }
+    
+    // Check if user has REMOVE permission for Document entity
+    @AllowPermission(action = CrudActions.REMOVE)
+    public void deleteDocument(String id) {
+        super.remove(id);
+    }
+    
+    // Custom business method with specific permission check
+    @AllowPermission(action = "PUBLISH")
+    public Document publishDocument(String id) {
+        Document doc = findDocument(id);
+        doc.setStatus("PUBLISHED");
+        return updateDocument(doc);
+    }
+    
+    // Method that requires multiple permissions
+    @AllowPermission(action = {CrudActions.UPDATE, "APPROVE"})
+    public Document approveAndUpdate(Document document) {
+        document.setApproved(true);
+        return super.update(document);
+    }
+}
+```
+
+**How Permission Checking Works:**
+
+1. **Pre-Execution Check**: Before any method annotated with `@AllowPermission` executes, the framework:
+   - Retrieves the current user's context from the Runtime Object
+   - Checks if the user has the required role/permission for the specified action and entity
+   - If permission is denied, throws a `PermissionException`
+
+2. **Runtime Context**: The framework automatically provides the current user's security context:
+   ```java
+   @Service
+   public class DocumentApi extends BaseEntityApi<Document> {
+       
+       @AllowPermission(action = CrudActions.SAVE)
+       public Document createDocument(Document document) {
+           // Framework automatically injects current user context
+           // Permission check happens before this method executes
+           return super.save(document);
+       }
+   }
+   ```
+
+3. **Automatic CRUD Permission Mapping**: For standard CRUD operations, the framework automatically maps:
+   - `save()` → `CrudActions.SAVE`
+   - `update()` → `CrudActions.UPDATE`
+   - `find()` → `CrudActions.FIND`
+   - `findAll()` → `CrudActions.FIND_ALL`
+   - `remove()` → `CrudActions.REMOVE`
+
+**Advanced Permission Scenarios:**
+
+```java
+@Service
+public class AdvancedDocumentApi extends BaseEntityApi<Document> {
+    
+    // Check permission for shared entity access
+    @AllowPermission(action = ShareAction.SHARE)
+    public void shareDocument(String documentId, String userId) {
+        // Share logic implementation
+    }
+    
+    // Check permission for custom business action
+    @AllowPermission(action = "ARCHIVE")
+    public Document archiveDocument(String id) {
+        Document doc = findDocument(id);
+        doc.setArchived(true);
+        return updateDocument(doc);
+    }
+    
+    // Method that doesn't require permission checking (use with caution)
+    @NoPermissionCheck
+    public List<Document> getPublicDocuments() {
+        // This method bypasses permission checking
+        // Use only for truly public data
+        return findAll();
+    }
+}
+```
+
+**Permission Annotation Types:**
+
+- **`@AllowPermissions`**: Checks specific permissions on entity instances (requires entity parameter or ID)
+- **`@AllowGenericPermissions`**: Checks generic permissions on resource types (doesn't require specific entity)
+- **`@AllowRoles`**: Checks if user has specific roles
+- **`@AllowLoggedUser`**: Ensures method is called only by authenticated users
+- **`@AllowPermissionsOnReturn`**: Checks permissions on the object returned by the method
+
+**Best Practices:**
+
+1. **Always Use Annotations**: Every public method in API services should have appropriate permission annotations
+2. **Choose the Right Annotation**: 
+   - Use `@AllowPermissions` for entity-specific operations
+   - Use `@AllowGenericPermissions` for general resource operations
+   - Use `@AllowRoles` for role-based access control
+   - Use `@AllowLoggedUser` for basic authentication checks
+3. **Be Specific with Actions**: Use the most specific action names possible
+4. **Test Permissions**: Always test with different user roles to ensure proper access control
+5. **Document Custom Actions**: Clearly document any custom actions defined in your entities
+6. **Use Return Permissions Carefully**: `@AllowPermissionsOnReturn` should only be used when the returned object needs permission validation
+7. **Avoid Generic Permissions for Sensitive Operations**: Use specific permissions for operations that modify or delete data
+
+**Example: Complete API Service with Permissions**
+
+```java
+@Service
+public class ProjectApi extends BaseEntityApi<Project> {
+    
+    // Standard CRUD operations with automatic permission checking
+    @AllowPermission(action = CrudActions.SAVE)
+    public Project createProject(Project project) {
+        return super.save(project);
+    }
+    
+    @AllowPermission(action = CrudActions.UPDATE)
+    public Project updateProject(Project project) {
+        return super.update(project);
+    }
+    
+    @AllowPermission(action = CrudActions.FIND)
+    public Project findProject(String id) {
+        return super.find(id);
+    }
+    
+    @AllowPermission(action = CrudActions.FIND_ALL)
+    public List<Project> getAllProjects() {
+        return super.findAll();
+    }
+    
+    @AllowPermission(action = CrudActions.REMOVE)
+    public void deleteProject(String id) {
+        super.remove(id);
+    }
+    
+    // Custom business methods with specific permissions
+    @AllowPermission(action = "ASSIGN_TEAM")
+    public Project assignTeamToProject(String projectId, List<String> teamMemberIds) {
+        Project project = findProject(projectId);
+        project.setTeamMembers(teamMemberIds);
+        return updateProject(project);
+    }
+    
+    @AllowPermission(action = ShareAction.SHARE)
+    public void shareProjectWithUser(String projectId, String userId) {
+        // Implementation for sharing project
+    }
+}
+```
+
+This permission enforcement system ensures that Water Framework applications maintain strict security boundaries while providing developers with clear, declarative control over access permissions.
+
+### Integration Modules for Cross-Module Communication
+
+Each module can define its own integration module to be invoked by other modules via REST or other technologies:
+
+#### **Integration Client Pattern**
+```java
+@FrameworkComponent(priority = 2)
+public class SharedEntityTestClient implements SharedEntityIntegrationClient {
+    @Override
+    public Collection<Long> fetchSharingUsersIds(String resourceName, long resourceId) {
+        // Implementation for cross-module communication
+        return List.of(1L);
+    }
+}
+```
+
+#### **REST Integration Examples**
+Modules can expose REST APIs for integration:
+
+```java
+@ExtendWith(WaterTestExtension.class)
+public class SharedEntityRestApiTest implements Service {
+
+    @Inject
+    @Setter
+    private ComponentRegistry componentRegistry;
+
+    @Inject
+    @Setter
+    private UserIntegrationClient userIntegrationClient;
+
+    @Karate.Test
+    Karate restInterfaceTest() {
+        return Karate.run("classpath:karate")
+                .systemProperty("webServerPort", TestRuntimeInitializer.getInstance().getRestServerPort())
+                .systemProperty("host", "localhost")
+                .systemProperty("protocol", "http");
+    }
+}
+```
+
+#### **Service-to-Service Integration**
+Modules can directly inject and use services from other modules:
+
+```java
+@FrameworkComponent
+public class TestServiceImpl extends BaseServiceImpl implements TestServiceApi {
+    
+    @Inject
+    @Setter
+    @Getter
+    private TestSystemServiceApi systemService;
+
+    @Override
+    public void doSomething() {
+        this.getSystemService().doSomething();
+    }
+}
+```
+
+### Key Architectural Principles
+
+#### **1. Separation of Concerns**
+- **Public APIs**: Handle external requests with permission checking
+- **System APIs**: Handle internal operations without permission overhead
+- **REST APIs**: Expose public APIs as HTTP endpoints
+
+#### **2. Security by Design**
+- **Automatic Permission Checking**: All public API calls are automatically secured
+- **Role-Based Access Control**: Default roles and permissions for common operations
+- **Resource-Level Security**: Fine-grained control over entity access
+
+#### **3. Performance Optimization**
+- **System APIs**: Bypass permission checking for internal operations
+- **Lazy Loading**: Dependencies injected only when needed
+- **Caching**: Built-in caching for frequently accessed data
+
+#### **4. Extensibility**
+- **Plugin Architecture**: Easy to extend with custom services
+- **Integration Points**: Standardized interfaces for cross-module communication
+- **Custom Actions**: Ability to define custom actions beyond CRUD operations
+
+This service architecture ensures that Water Framework applications are secure, performant, and maintainable while providing the flexibility needed for complex enterprise applications.
+
 ## Framework Concepts
 
 ### Service Layer
