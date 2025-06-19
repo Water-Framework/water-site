@@ -773,657 +773,546 @@ public class TestServiceImpl extends BaseServiceImpl implements TestServiceApi {
 
 This service architecture ensures that Water Framework applications are secure, performant, and maintainable while providing the flexibility needed for complex enterprise applications.
 
-## Framework Concepts
+## Entity Management
 
-### Service Layer
-The service layer defines different types of services in the framework:
+Water Framework provides a comprehensive entity management system that leverages standard JPA/Hibernate annotations while adding powerful validation capabilities and transaction management features.
 
-1. **SystemApi**
-   - Internal framework services
-   - Not exposed to external applications
-   - Used for framework core functionality
-   - Example: `ComponentRegistry`, `BundleManager`
+### JPA/Hibernate Integration
 
-2. **Api**
-   - Public application services
-   - Exposed to external applications
-   - Used for business logic implementation
-   - Example: `UserApi`, `PermissionApi`
+Water Framework entities use standard JPA/Hibernate annotations for persistence mapping. All entities extend `AbstractJpaEntity`, which provides automatic field management and lifecycle hooks.
 
-3. **RestApi**
-   - HTTP endpoint interfaces
-   - Exposed as REST services
-   - Used for external communication
-   - Example: `UserRestApi`, `DocumentRestApi`
+#### AbstractJpaEntity Foundation
 
-Example:
-```java
-// System API - Internal framework service
-public interface SystemComponentRegistry extends SystemApi {
-    void registerComponent(Object component);
-    void unregisterComponent(Object component);
-}
+`AbstractJpaEntity` is the base class for all Water Framework entities and provides the following automatically managed fields:
 
-// Public API - Application service
-public interface UserApi extends Api {
-    User createUser(User user);
-    User findUser(long id);
-    void updateUser(User user);
-}
+- **`id`** (`@Id @GeneratedValue`): Primary key with auto-generation
+- **`entityVersion`** (`@Version`): Optimistic locking version field
+- **`entityCreateDate`** (`@Temporal(TemporalType.TIMESTAMP)`): Automatic creation timestamp
+- **`entityModifyDate`** (`@Temporal(TemporalType.TIMESTAMP)`): Automatic modification timestamp
 
-// REST API - HTTP endpoints
-public interface UserRestApi extends RestApi {
-    @GET
-    @Path("/{id}")
-    User getUser(@PathParam("id") long id);
-    
-    @POST
-    @Path("/")
-    User createUser(User user);
-}
-```
+The class also provides automatic lifecycle management:
+- **`@PrePersist`**: Automatically sets creation and modification dates
+- **`@PreUpdate`**: Automatically updates modification date
+- **`doPrePersist()`** and **`doPreUpdate()`**: Overridable hooks for custom logic
 
-### Registry
-The registry manages component lifecycle and discovery:
+#### Entity Example
 
-1. **ComponentRegistry**
-   - Central registry for all components
-   - Handles component registration and discovery
-   - Manages component lifecycle
-   - Supports component filtering
-
-2. **ComponentFilter**
-   - Filters components based on properties
-   - Supports complex filter conditions
-   - Used for component discovery
-
-3. **ComponentConfiguration**
-   - Configures component behavior
-   - Defines component properties
-   - Sets component priority
-
-Example:
-```java
-// Create component configuration
-ComponentConfiguration config = ComponentConfigurationFactory
-    .createNewComponentPropertyFactory()
-    .withProp("timeout", 5000)
-    .withProp("retries", 3)
-    .withPriority(2)
-    .build();
-
-// Create complex filter
-ComponentFilter filter = componentRegistry.getComponentFilterBuilder()
-    .createFilter("type", "service")
-    .and("name", "userService")
-    .or("type", "repository")
-    .not();
-
-// Register component
-ComponentRegistration<Service, ?> registration = 
-    componentRegistry.registerComponent(Service.class, new UserService(), config);
-
-// Find components
-List<Service> services = componentRegistry.findComponents(Service.class, filter);
-Service service = componentRegistry.findComponent(Service.class, filter);
-```
-
-### Permission
-The permission system provides fine-grained access control:
-
-1. **Permission**
-   - Defines access control rules
-   - Maps to specific actions
-   - Can be assigned to roles
-
-2. **Action**
-   - Represents operations that can be performed
-   - Defined in action classes
-   - Used in permission annotations
-
-3. **PermissionManager**
-   - Manages permission checking
-   - Handles permission assignment
-   - Validates permissions
-
-Example:
-```java
-// Define actions
-public abstract class UserActions {
-    public static final String CREATE = "create";
-    public static final String READ = "read";
-    public static final String UPDATE = "update";
-    public static final String DELETE = "delete";
-}
-
-// Use permission annotations
-@Service
-public class UserServiceImpl implements UserApi {
-    @AllowPermissions(actions = {UserActions.CREATE})
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-    
-    @AllowPermissions(actions = {UserActions.READ})
-    public User findUser(long id) {
-        return userRepository.find(id);
-    }
-}
-
-// Check permissions programmatically
-boolean hasPermission = PermissionUtil.hasPermission(
-    SecurityContext.get(),
-    UserActions.READ,
-    user
-);
-```
-
-### Model
-The model package defines core entity types:
-
-1. **BaseEntity**
-   - Base interface for all entities
-   - Defines common fields (id, version, dates)
-   - Supports basic entity operations
-
-2. **ExpandableEntity**
-   - Entity with dynamic properties
-   - Allows property addition without modification
-   - Useful for flexible data structures
-
-3. **OwnedEntity**
-   - Entity with owner information
-   - Tracks ownership details
-   - Supports ownership-based permissions
-
-4. **SharedEntity**
-   - Entity that can be shared
-   - Manages sharing permissions
-   - Tracks shared users
-
-Example:
 ```java
 @Entity
-@AccessControl
-public class User implements BaseEntity {
-    @Id
-    private long id;
-    private String username;
-    private String email;
+@Table(name = "documents")
+public class Document extends AbstractJpaEntity implements ProtectedEntity, OwnedResource {
     
-    // Entity will automatically support permission checking
-}
-
-@Entity
-public class Document extends AbstractEntity implements ExpandableEntity {
+    @Column(name = "title", nullable = false, length = 255)
     private String title;
+    
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
     
-    public void addProperty(String key, Object value) {
-        // Add dynamic property
-    }
-}
-
-@Entity
-public class UserDocument extends AbstractEntity implements OwnedEntity {
-    private long ownerId;
-    private String ownerUsername;
+    @Column(name = "file_size")
+    private Long fileSize;
     
-    @Override
-    public long getOwnerId() {
-        return ownerId;
-    }
+    @Column(name = "mime_type")
+    private String mimeType;
+    
+    @Column(name = "owner_user_id")
+    private Long ownerUserId;
+    
+    // Relationships
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id")
+    private Folder folder;
+    
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DocumentVersion> versions = new ArrayList<>();
+    
+    // Getters and setters...
 }
 ```
 
-### Repository
-The repository package defines data access interfaces:
+**Note**: The `id`, `entityVersion`, `entityCreateDate`, and `entityModifyDate` fields are automatically provided by `AbstractJpaEntity` and should not be redeclared in child entities. The framework handles their persistence, serialization, and lifecycle management automatically.
 
-1. **BaseRepository**
-   - Base interface for data access
-   - Defines CRUD operations
-   - Supports query operations
+### Validation Framework
 
-2. **Query**
-   - Defines search criteria
-   - Supports complex conditions
-   - Used for data filtering
+Water Framework supports both standard Jakarta validation annotations and custom validation annotations from the Core-validation module.
 
-3. **RepositoryManager**
-   - Manages repository lifecycle
-   - Handles repository registration
-   - Provides repository discovery
+#### Standard Jakarta Validation
 
-Example:
-```java
-@Repository
-public class UserRepository implements BaseRepository<User> {
-    @Override
-    public User find(long id) {
-        // Implementation
-    }
-    
-    @Override
-    public List<User> findAll(Query filter) {
-        // Implementation
-    }
-    
-    @Override
-    public User save(User entity) {
-        // Implementation
-    }
-}
-```
-
-### Bundle
-The bundle package manages component lifecycle:
-
-1. **BundleManager**
-   - Manages bundle lifecycle
-   - Handles bundle activation/deactivation
-   - Manages bundle dependencies
-
-2. **BundleContext**
-   - Provides bundle context
-   - Manages bundle configuration
-   - Handles bundle state
-
-3. **BundleConfiguration**
-   - Configures bundle behavior
-   - Defines bundle properties
-   - Sets bundle priority
-
-Example:
-```java
-@Component
-public class UserBundle implements Bundle {
-    @OnActivate
-    public void activate(Map<String, Object> properties) {
-        // Bundle activation logic
-        String configValue = (String) properties.get("config.key");
-        // Initialize resources
-    }
-    
-    @OnDeactivate
-    public void deactivate() {
-        // Bundle deactivation logic
-        // Cleanup resources
-    }
-}
-```
-
-### Security
-The security package provides security features:
-
-1. **SecurityContext**
-   - Manages security context
-   - Handles authentication state
-   - Provides user information
-
-2. **AuthenticationManager**
-   - Handles authentication
-   - Validates credentials
-   - Manages sessions
-
-3. **AuthorizationManager**
-   - Manages authorization
-   - Checks permissions
-   - Handles role assignment
-
-Example:
-```java
-// Get security context
-SecurityContext securityContext = SecurityContext.get();
-
-// Check authentication
-if (!securityContext.isAuthenticated()) {
-    throw new SecurityException("User not authenticated");
-}
-
-// Check authorization
-if (!securityContext.hasPermission("user:read")) {
-    throw new SecurityException("User not authorized");
-}
-
-// Get current user
-User currentUser = securityContext.getLoggedUser();
-```
-
-### Entity
-The entity package provides entity management:
-
-1. **EntityManager**
-   - Manages entity lifecycle
-   - Handles entity persistence
-   - Manages entity state
-
-2. **EntityValidator**
-   - Validates entities
-   - Checks entity constraints
-   - Provides validation results
-
-3. **EntityExtension**
-   - Extends entity functionality
-   - Adds dynamic behavior
-   - Supports entity composition
-
-Example:
 ```java
 @Entity
-@AccessControl
-public class User implements BaseEntity {
-    @Id
-    private long id;
+public class User extends AbstractJpaEntity implements ProtectedEntity {
     
     @NotNull
+    @Size(min = 3, max = 50)
+    @Column(name = "username", unique = true)
     private String username;
     
+    @NotNull
     @Email
+    @Column(name = "email", unique = true)
     private String email;
     
-    // Entity will be automatically validated
-}
-
-// Use entity validator
-public class UserValidator implements Validator<User> {
-    @Override
-    public ValidationResult validate(User user) {
-        ValidationResult result = new ValidationResult();
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            result.addError("email", "Invalid email format");
-        }
-        return result;
-    }
-}
-```
-
-### Interceptors
-The interceptors package provides cross-cutting concerns:
-
-1. **MethodInterceptor**
-   - Intercepts method calls
-   - Provides pre/post processing
-   - Supports method modification
-
-2. **InterceptorChain**
-   - Manages interceptor chain
-   - Controls interceptor order
-   - Handles interceptor execution
-
-3. **InterceptorContext**
-   - Provides interceptor context
-   - Manages interceptor state
-   - Supports interceptor communication
-
-Example:
-```java
-@Interceptor
-public class SecurityInterceptor implements MethodInterceptor {
-    @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
-        // Pre-execution security checks
-        SecurityContext securityContext = SecurityContext.get();
-        if (!securityContext.isAuthenticated()) {
-            throw new SecurityException("User not authenticated");
-        }
-        
-        // Execute the method
-        Object result = invocation.proceed();
-        
-        // Post-execution processing
-        return result;
-    }
-}
-
-// Use interceptor
-@InterceptWith(SecurityInterceptor.class)
-public class SecureService {
-    public void secureMethod() {
-        // Method implementation
-    }
+    @NotNull
+    @Size(min = 8, max = 100)
+    @Column(name = "password")
+    private String password;
+    
+    @Min(0)
+    @Max(120)
+    @Column(name = "age")
+    private Integer age;
+    
+    @Pattern(regexp = "^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$")
+    @Column(name = "iban")
+    private String iban;
+    
+    // Getters and setters...
 }
 ```
 
-### Role
-The role package manages user roles:
+#### Water Framework Custom Validations
 
-1. **Role**
-   - Defines user roles
-   - Groups permissions
-   - Manages role hierarchy
+The Core-validation module provides specialized validation annotations:
 
-2. **RoleManager**
-   - Manages role lifecycle
-   - Handles role assignment
-   - Manages role permissions
-
-3. **RoleAssignment**
-   - Assigns roles to users
-   - Manages role membership
-   - Handles role inheritance
-
-Example:
 ```java
 @Entity
-public class Role implements BaseEntity {
-    @Id
-    private long id;
+public class SecureDocument extends AbstractJpaEntity implements ProtectedEntity {
     
-    private String name;
+    @NotNull
+    @Column(name = "title")
+    private String title;
     
-    @ManyToMany
-    private Set<Permission> permissions;
+    @ValidPassword
+    @Column(name = "access_password")
+    private String accessPassword;
+    
+    @NoMalitiusCode
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+    
+    @PowOf2
+    @Column(name = "buffer_size")
+    private Integer bufferSize;
+    
+    @NotNullOnPersist
+    @Column(name = "document_type")
+    private String documentType;
+    
+    // Getters and setters...
 }
+```
 
-@Service
-public class RoleServiceImpl implements RoleApi {
-    @Override
-    public Role createRole(String name, Set<Permission> permissions) {
-        Role role = new Role();
-        role.setName(name);
-        role.setPermissions(permissions);
-        return roleRepository.save(role);
+**Available Custom Validations:**
+
+- **`@ValidPassword`**: Ensures password meets security requirements (minimum 8 characters, complexity rules)
+- **`@NoMalitiusCode`**: Prevents insertion of malicious code in text fields
+- **`@PowOf2`**: Validates that a number is a power of 2
+- **`@NotNullOnPersist`**: Ensures field is not null specifically during persistence operations
+
+### Repository Operations and Transaction Management
+
+Water Framework repositories provide comprehensive CRUD operations with built-in transaction management and event support.
+
+#### Basic Repository Operations
+
+```java
+@FrameworkComponent
+public class DocumentRepositoryImpl extends BaseJpaRepositoryImpl<Document> implements DocumentRepository {
+    
+    public DocumentRepositoryImpl() {
+        super(Document.class);
     }
     
     @Override
-    public void assignRole(User user, Role role) {
-        user.getRoles().add(role);
-        userRepository.update(user);
+    public Document persist(Document entity) {
+        return super.persist(entity);
+    }
+    
+    @Override
+    public Document update(Document entity) {
+        return super.update(entity);
+    }
+    
+    @Override
+    public void remove(long id) {
+        super.remove(id);
+    }
+    
+    @Override
+    public Document find(long id) {
+        return super.find(id);
+    }
+    
+    @Override
+    public PaginableResult<Document> findAll(Query filter, int delta, int page, QueryOrder queryOrder) {
+        return super.findAll(filter, delta, page, queryOrder);
     }
 }
 ```
 
-### User
-The user package manages user functionality:
+#### Transaction Management
 
-1. **User**
-   - Represents system users
-   - Manages user data
-   - Handles user state
+Water Framework provides programmatic transaction management through dedicated transaction methods rather than annotations. The framework offers two main transaction methods:
 
-2. **UserManager**
-   - Manages user lifecycle
-   - Handles user operations
-   - Manages user state
+```java
+@FrameworkComponent
+public class DocumentRepositoryImpl extends BaseJpaRepositoryImpl<Document> implements DocumentRepository {
+    
+    public DocumentRepositoryImpl() {
+        super(Document.class);
+    }
+    
+    @Override
+    public Document persist(Document entity) {
+        // Use tx method for transaction management
+        return tx(Transactional.TxType.REQUIRED, entityManager -> {
+            // Custom transaction logic
+            Document savedEntity = entityManager.merge(entity);
+            entityManager.flush();
+            return savedEntity;
+        });
+    }
+    
+    @Override
+    public Document update(Document entity) {
+        return tx(Transactional.TxType.REQUIRED, entityManager -> {
+            // Update logic within transaction
+            Document existingEntity = entityManager.find(Document.class, entity.getId());
+            if (existingEntity == null) {
+                throw new EntityNotFound();
+            }
+            return entityManager.merge(entity);
+        });
+    }
+    
+    @Override
+    public void remove(long id) {
+        txExpr(Transactional.TxType.REQUIRED, entityManager -> {
+            // Remove logic within transaction
+            Document entity = entityManager.find(Document.class, id);
+            if (entity != null) {
+                entityManager.remove(entity);
+            }
+        });
+    }
+    
+    @Override
+    public Document find(long id) {
+        return tx(Transactional.TxType.SUPPORTS, entityManager -> {
+            // Read operation with SUPPORTS transaction type
+            return entityManager.find(Document.class, id);
+        });
+    }
+    
+    public void complexOperation(Document document) {
+        // Programmatic transaction control with custom logic
+        tx(Transactional.TxType.REQUIRED, entityManager -> {
+            // Complex business logic within transaction
+            Document found = entityManager.find(Document.class, document.getId());
+            found.setModifiedDate(new Date());
+            
+            // Additional operations in the same transaction
+            entityManager.merge(found);
+            entityManager.flush();
+            
+            return found;
+        });
+    }
+}
+```
 
-3. **UserContext**
-   - Provides user context
-   - Manages user session
-   - Handles user preferences
+**Transaction Method Types:**
 
-Example:
+- **`tx(TxType, Function<EntityManager, R>)`**: Executes code within a transaction and returns a result
+- **`txExpr(TxType, Consumer<EntityManager>)`**: Executes code within a transaction without returning a result
+
+**Transaction Types:**
+
+- **`REQUIRED`**: Uses existing transaction or creates new one
+- **`REQUIRES_NEW`**: Always creates a new transaction
+- **`SUPPORTS`**: Uses existing transaction if available, otherwise no transaction
+- **`NOT_SUPPORTED`**: Suspends current transaction if exists
+- **`MANDATORY`**: Requires existing transaction, throws exception if none
+- **`NEVER`**: Throws exception if transaction exists
+
+#### Automatic Event Generation
+
+Water Framework automatically generates events for all CRUD operations through the `BaseEntitySystemServiceImpl`. These events are fired automatically without any additional configuration:
+
+**Available Events:**
+
+- **Pre-Save Events**: `PreSaveEvent<T>` - Fired before entity is saved
+- **Post-Save Events**: `PostSaveEvent<T>` - Fired after entity is saved
+- **Pre-Update Events**: `PreUpdateEvent<T>` - Fired before entity is updated
+- **Post-Update Events**: `PostUpdateEvent<T>` - Fired after entity is updated
+- **Pre-Remove Events**: `PreRemoveEvent<T>` - Fired before entity is removed
+- **Post-Remove Events**: `PostRemoveEvent<T>` - Fired after entity is removed
+- **Detailed Events**: `PreUpdateDetailedEvent<T>`, `PostUpdateDetailedEvent<T>` - Include before/after entity state
+
+**Event Implementation Example:**
+
+```java
+@FrameworkComponent
+public class DocumentPreSaveListener implements PreSaveEvent<Document> {
+    
+    @Override
+    public void consumerEvent(Document resource, Event event) {
+        log.info("Document {} is about to be saved", resource.getTitle());
+        // Pre-save logic
+    }
+}
+
+@FrameworkComponent
+public class DocumentPostSaveListener implements PostSaveEvent<Document> {
+    
+    @Override
+    public void consumerEvent(Document resource, Event event) {
+        log.info("Document {} has been saved with ID {}", resource.getTitle(), resource.getId());
+        // Post-save logic
+    }
+}
+
+@FrameworkComponent
+public class DocumentPreUpdateListener implements PreUpdateEvent<Document> {
+    
+    @Override
+    public void consumerEvent(Document resource, Event event) {
+        log.info("Document {} is about to be updated", resource.getTitle());
+        // Pre-update logic
+    }
+}
+
+@FrameworkComponent
+public class DocumentPostUpdateListener implements PostUpdateEvent<Document> {
+    
+    @Override
+    public void consumerEvent(Document resource, Event event) {
+        log.info("Document {} has been updated", resource.getTitle());
+        // Post-update logic
+    }
+}
+
+@FrameworkComponent
+public class DocumentPreRemoveListener implements PreRemoveEvent<Document> {
+    
+    @Override
+    public void consumerEvent(Document resource, Event event) {
+        log.info("Document {} is about to be removed", resource.getTitle());
+        // Pre-remove logic
+    }
+}
+
+@FrameworkComponent
+public class DocumentPostRemoveListener implements PostRemoveEvent<Document> {
+    
+    @Override
+    public void consumerEvent(Document resource, Event event) {
+        log.info("Document {} has been removed", resource.getTitle());
+        // Post-remove logic
+    }
+}
+
+@FrameworkComponent
+public class DocumentPreUpdateDetailedListener implements PreUpdateDetailedEvent<Document> {
+    
+    @Override
+    public void consumerDetailedEvent(Document beforeResource, Document afterResource, Event event) {
+        log.info("Document {} is about to be updated from {} to {}", 
+            beforeResource.getTitle(), beforeResource.getStatus(), afterResource.getStatus());
+        // Pre-update detailed logic
+    }
+}
+
+@FrameworkComponent
+public class DocumentPostUpdateDetailedListener implements PostUpdateDetailedEvent<Document> {
+    
+    @Override
+    public void consumerDetailedEvent(Document beforeResource, Document afterResource, Event event) {
+        log.info("Document {} has been updated from {} to {}", 
+            beforeResource.getTitle(), beforeResource.getStatus(), afterResource.getStatus());
+        // Post-update detailed logic
+    }
+}
+```
+
+**Event Production in BaseEntitySystemServiceImpl:**
+
+```java
+// Save operation with automatic events
+public T save(T entity) {
+    validate(entity);
+    validateEntityExtension(entity);
+    
+    // Automatically fire pre-save event
+    produceEvent(entity, PreSaveEvent.class);
+    
+    // Perform save operation
+    this.getRepository().persist(entity);
+    
+    // Automatically fire post-save event
+    produceEvent(entity, PostSaveEvent.class);
+    
+    return entity;
+}
+
+// Update operation with detailed events
+public T update(T entity) {
+    validate(entity);
+    validateEntityExtension(entity);
+    
+    // Get entity before update for detailed events
+    T entityBeforeUpdate = find(entity.getId());
+    
+    // Fire pre-update events
+    produceEvent(entity, PreUpdateEvent.class);
+    produceDetailedEvent(entityBeforeUpdate, entity, PreUpdateDetailedEvent.class);
+    
+    // Perform update operation
+    T updatedEntity = this.getRepository().update(entity);
+    
+    // Fire post-update events
+    produceDetailedEvent(entityBeforeUpdate, updatedEntity, PostUpdateDetailedEvent.class);
+    
+    return updatedEntity;
+}
+```
+
+### Spring Repository Compatibility
+
+Water Framework repositories are fully compatible with Spring Data JPA. There are two main approaches to integrate Water repositories with Spring:
+
+#### Approach 1: Extend Both JpaRepository and BaseRepository
+
+```java
+@Repository
+public interface DocumentRepository extends JpaRepository<Document, Long>, BaseRepository<Document> {
+    
+    // Standard Spring Data JPA methods
+    List<Document> findByTitleContaining(String title);
+    List<Document> findByOwnerUserIdAndCreatedDateAfter(Long ownerId, Date date);
+    Optional<Document> findByTitleAndOwnerUserId(String title, Long ownerId);
+    
+    // Custom query methods
+    @Query("SELECT d FROM Document d WHERE d.fileSize > :minSize")
+    List<Document> findLargeDocuments(@Param("minSize") Long minSize);
+    
+    // Water Framework specific methods are inherited from BaseRepository
+    // persist(), update(), remove(), find(), findAll(), etc.
+}
+```
+
+#### Approach 2: Use WaterJpaRepositoryImpl with @FrameworkComponent
+
+```java
+@FrameworkComponent
+public class DocumentWaterRepository extends WaterJpaRepositoryImpl<Document> implements DocumentRepository {
+    
+    public DocumentWaterRepository() {
+        super(Document.class, "document-persistence-unit");
+    }
+    
+    // Custom repository methods
+    public List<Document> findDocumentsByOwner(Long ownerId) {
+        return tx(Transactional.TxType.SUPPORTS, entityManager -> {
+            return entityManager.createQuery(
+                "SELECT d FROM Document d WHERE d.ownerUserId = :ownerId", Document.class)
+                .setParameter("ownerId", ownerId)
+                .getResultList();
+        });
+    }
+    
+    // Override Water Framework methods if needed
+    @Override
+    public Document persist(Document entity) {
+        return super.persist(entity, () -> {
+            // Custom post-persist logic
+            log.info("Document {} persisted with custom logic", entity.getTitle());
+        });
+    }
+}
+```
+
+#### Spring Service Integration
+
+```java
+@Service
+@Transactional
+public class DocumentService {
+    
+    @Autowired
+    private DocumentRepository documentRepository; // Spring repository
+    
+    @Autowired
+    private DocumentWaterRepository documentWaterRepository; // Water repository
+    
+    public Document createDocument(Document document) {
+        // Uses Water Framework's persist method with transaction events
+        return documentWaterRepository.persist(document);
+    }
+    
+    public List<Document> findUserDocuments(Long userId) {
+        // Uses Spring Data JPA's query methods
+        return documentRepository.findByOwnerUserId(userId);
+    }
+    
+    public Document updateDocument(Document document) {
+        // Uses Water Framework's update method with automatic events
+        return documentWaterRepository.update(document);
+    }
+    
+    public List<Document> findLargeDocuments(Long minSize) {
+        // Uses Spring Data JPA's custom query
+        return documentRepository.findLargeDocuments(minSize);
+    }
+}
+```
+
+**Spring Integration Benefits:**
+
+- **Familiar API**: Use standard Spring Data JPA patterns
+- **Water Features**: Access Water Framework's advanced features (events, transactions)
+- **Transaction Management**: Leverage Spring's transaction management
+- **Dependency Injection**: Use Spring's DI container
+- **Testing**: Easy integration with Spring Boot Test
+- **Flexibility**: Choose between Spring Data JPA and Water Framework methods as needed
+
+### Entity Lifecycle and Validation
+
+Water Framework automatically handles entity lifecycle events and validation:
+
 ```java
 @Entity
-public class User implements BaseEntity {
-    @Id
-    private long id;
+public class Document extends AbstractJpaEntity implements ProtectedEntity, OwnedResource {
     
-    private String username;
-    
-    private String email;
-    
-    @ManyToMany
-    private Set<Role> roles;
-}
-
-@Service
-public class UserServiceImpl implements UserApi {
-    @Override
-    public User createUser(String username, String email) {
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        return userRepository.save(user);
+    @PrePersist
+    protected void onCreate() {
+        createdDate = new Date();
+        modifiedDate = new Date();
     }
     
-    @Override
-    public User findUser(long id) {
-        return userRepository.find(id);
-    }
-}
-```
-
-### Notification
-The notification package handles system notifications:
-
-1. **NotificationManager**
-   - Manages notifications
-   - Handles notification delivery
-   - Manages notification state
-
-2. **NotificationTemplate**
-   - Defines notification templates
-   - Manages template variables
-   - Handles template rendering
-
-3. **NotificationSender**
-   - Sends notifications
-   - Manages delivery channels
-   - Handles delivery status
-
-Example:
-```java
-@Service
-public class NotificationServiceImpl implements NotificationApi {
-    @Override
-    public void sendWelcomeEmail(User user) {
-        NotificationTemplate template = notificationManager
-            .getTemplate("welcome-email");
-            
-        template.setParameter("username", user.getUsername());
-        template.setParameter("activationLink", generateActivationLink(user));
-        
-        notificationManager.send(template, user.getEmail());
+    @PreUpdate
+    protected void onUpdate() {
+        modifiedDate = new Date();
     }
     
-    @Override
-    public void sendPasswordReset(User user) {
-        NotificationTemplate template = notificationManager
-            .getTemplate("password-reset");
-            
-        template.setParameter("username", user.getUsername());
-        template.setParameter("resetLink", generateResetLink(user));
-        
-        notificationManager.send(template, user.getEmail());
+    @PreRemove
+    protected void onRemove() {
+        // Cleanup logic before removal
+        log.info("Document {} is being removed", getId());
     }
+    
+    // Validation groups for different operations
+    @NotNull(groups = {CreateGroup.class, UpdateGroup.class})
+    @Size(min = 1, max = 255, groups = {CreateGroup.class, UpdateGroup.class})
+    private String title;
+    
+    @ValidPassword(groups = CreateGroup.class)
+    private String accessPassword;
+    
+    // Getters and setters...
 }
 ```
 
-### Action
-The action package defines system actions:
-
-1. **Action**
-   - Defines system actions
-   - Maps to permissions
-   - Supports action hierarchy
-
-2. **ActionManager**
-   - Manages action lifecycle
-   - Handles action registration
-   - Manages action state
-
-3. **ActionExecutor**
-   - Executes actions
-   - Manages action context
-   - Handles action results
-
-Example:
-```java
-public abstract class CrudActions {
-    public static final String SAVE = "save";
-    public static final String UPDATE = "update";
-    public static final String FIND = "find";
-    public static final String FIND_ALL = "find-all";
-    public static final String REMOVE = "remove";
-}
-
-@Service
-public class UserServiceImpl implements UserApi {
-    @AllowPermissions(actions = {CrudActions.SAVE})
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-    
-    @AllowPermissions(actions = {CrudActions.FIND})
-    public User findUser(long id) {
-        return userRepository.find(id);
-    }
-}
-```
-
-### Validation
-The validation package provides validation functionality:
-
-1. **Validator**
-   - Validates objects
-   - Checks constraints
-   - Provides validation results
-
-2. **ValidationContext**
-   - Provides validation context
-   - Manages validation state
-   - Handles validation rules
-
-3. **ValidationResult**
-   - Contains validation results
-   - Manages validation errors
-   - Provides error details
-
-Example:
-```java
-public class UserValidator implements Validator<User> {
-    @Override
-    public ValidationResult validate(User user, ValidationContext context) {
-        ValidationResult result = new ValidationResult();
-        
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            result.addError("email", "Invalid email format");
-        }
-        
-        if (user.getUsername() == null || user.getUsername().length() < 3) {
-            result.addError("username", "Username must be at least 3 characters");
-        }
-        
-        return result;
-    }
-}
-
-// Use validator
-@Service
-public class UserServiceImpl implements UserApi {
-    @Inject
-    private Validator<User> userValidator;
-    
-    @Override
-    public User createUser(User user) {
-        ValidationResult result = userValidator.validate(user);
-        if (!result.isValid()) {
-            throw new ValidationException(result.getErrors());
-        }
-        return userRepository.save(user);
-    }
-}
-```
+This comprehensive entity management system ensures that Water Framework applications have robust, scalable, and maintainable data persistence while providing advanced features for complex business requirements.
 
 ## Component Lifecycle
 Components in Water Framework follow a well-defined lifecycle:

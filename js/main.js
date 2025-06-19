@@ -321,9 +321,40 @@ class ContentLoader {
         const html = marked.parse(text);
         const contentWrapper = utils.createElement('div', 'markdown-content');
         contentWrapper.innerHTML = html;
+        
+        // Add IDs to headings
+        this.addHeadingIds(contentWrapper);
+        
         container.innerHTML = '';
         container.appendChild(contentWrapper);
         this.highlightCodeBlocks(contentWrapper);
+    }
+
+    static addHeadingIds(container) {
+        // Find all heading elements (h1, h2, h3, h4, h5, h6)
+        const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        
+        headings.forEach(heading => {
+            // Get the text content of the heading
+            const text = heading.textContent.trim();
+            
+            // Convert to URL-friendly ID
+            const id = this.generateHeadingId(text);
+            
+            // Set the ID if it doesn't already exist
+            if (!heading.id) {
+                heading.id = id;
+            }
+        });
+    }
+
+    static generateHeadingId(text) {
+        return text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+            .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
     }
 
     static handleError(error, source) {

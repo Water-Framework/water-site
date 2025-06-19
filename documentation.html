@@ -46,10 +46,100 @@
             <aside class="docs-sidebar">
                 <nav>
                     <ul>
-                        <li><a href="#main-concepts" class="active" data-md="main-concepts.md">Main Concepts</a></li>
-                        <li><a href="#component-registry" data-md="component-registry.md">Component Registry</a></li>
-                        <li><a href="#security" data-md="security.md">Security</a></li>
-                        <li><a href="#implementations" data-md="implementations.md">Implementations</a></li>
+                        <!-- Introduction Section -->
+                        <li><a href="#introduction" data-md="introduction.md">Introduction</a></li>
+
+                        <!-- Getting Started Section -->
+                        <li><a href="#getting-started" data-md="getting-started.md">Getting Started</a></li>
+
+                        <!-- Basic Concepts Section -->
+                        <li>
+                            <a href="#basic-concepts">Basic Concepts</a>
+                            <ul class="sub-menu">
+                                <li><a href="#service-architecture" data-md="service-architecture.md">Service Architecture</a></li>
+                                <li><a href="#entity-management" data-md="entity-management.md">Entity Management</a></li>
+                                <li><a href="#validation" data-md="validation.md">Validation</a></li>
+                                <li><a href="#event-management" data-md="event-management.md">Event Management</a></li>
+                                <li><a href="#security-permissions" data-md="security-permissions.md">Security & Permissions</a></li>
+                                <li><a href="#component-lifecycle" data-md="component-lifecycle.md">Component Lifecycle</a></li>
+                                <li><a href="#interceptors-aop" data-md="interceptors-aop.md">Interceptors & AOP</a></li>
+                                <li><a href="#data-access-persistence" data-md="data-access-persistence.md">Data Access & Persistence</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Persistence Section -->
+                        <li>
+                            <a href="#persistence">Persistence</a>
+                            <ul class="sub-menu">
+                                <li><a href="#jpa-repository" data-md="jpa-repository.md">JPA Repository Framework</a></li>
+                                <li><a href="#query-filter-system" data-md="query-filter-system.md">Query & Filter System</a></li>
+                                <li><a href="#entity-extensions" data-md="entity-extensions.md">Entity Extensions & Validation</a></li>
+                            </ul>
+                        </li>
+
+                         <!-- REST API Section -->
+                         <li>
+                            <a href="#rest-api">REST Api</a>
+                            <ul class="sub-menu">
+                                <li><a href="#rest-service-layer" data-md="rest-service-layer.md">REST Service Layer</a></li>
+                                <li><a href="#rest-security" data-md="rest-security.md">REST Security & Integration</a></li>
+                                <li><a href="#api-documentation" data-md="api-documentation.md">API Documentation & Versioning</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Architecture Section -->
+                        <li>
+                            <a href="#architecture">Architecture</a>
+                            <ul class="sub-menu">
+                                <li><a href="#system-architecture" data-md="system-architecture.md">System Architecture Overview</a></li>
+                                <li><a href="#component-interaction" data-md="component-interaction.md">Component Interaction Flows</a></li>
+                                <li><a href="#security-flows" data-md="security-flows.md">Security & Permission Flows</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Clustering Section -->
+                        <li>
+                            <a href="#clustering">Clustering</a>
+                            <ul class="sub-menu">
+                                <li><a href="#clustering-overview" data-md="clustering-overview.md">Clustering Overview</a></li>
+                                <li><a href="#distributed-components" data-md="distributed-components.md">Distributed Components</a></li>
+                                <li><a href="#cluster-coordination" data-md="cluster-coordination.md">Cluster Coordination</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Microservices Section -->
+                        <li>
+                            <a href="#microservices">Microservices</a>
+                            <ul class="sub-menu">
+                                <li><a href="#microservices-overview" data-md="microservices-overview.md">Microservices Overview</a></li>
+                                <li><a href="#service-discovery" data-md="service-discovery.md">Service Discovery</a></li>
+                                <li><a href="#service-mesh" data-md="service-mesh.md">Service Mesh Integration</a></li>
+                                <li><a href="#distributed-tracing" data-md="distributed-tracing.md">Distributed Tracing</a></li>
+                            </ul>
+                        </li>
+
+
+                        <!-- Best Practices Section -->
+                        <li>
+                            <a href="#best-practices">Best Practices</a>
+                            <ul class="sub-menu">
+                                <li><a href="#development-patterns" data-md="development-patterns.md">Development Patterns</a></li>
+                                <li><a href="#testing-strategies" data-md="testing-strategies.md">Testing Strategies</a></li>
+                                <li><a href="#performance-scalability" data-md="performance-scalability.md">Performance & Scalability</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Framework Implementations Section -->
+                        <li>
+                            <a href="#implementations">Implementations</a>
+                            <ul class="sub-menu">
+                                <li><a href="#spring-integration" data-md="spring-integration.md">Spring Integration</a></li>
+                                <li><a href="#osgi-integration" data-md="osgi-integration.md">OSGi Integration</a></li>
+                                <li><a href="#quarkus-integration" data-md="quarkus-integration.md">Quarkus Integration</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Modules Section -->
                         <li>
                             <a href="#modules">Modules</a>
                             <ul class="sub-menu">
@@ -72,111 +162,13 @@
                                 <li><a href="#user" remote-md="https://raw.githubusercontent.com/Water-Framework/User/refs/heads/main/README.md">User</a></li>
                             </ul>
                         </li>
-                        <li><a href="#api-reference" data-md="api-reference.md">API Reference</a></li>
                     </ul>
                 </nav>
             </aside>
 
             <!-- Documentation Content -->
             <div class="docs-content" id="docs-content">
-                <section id="modules" class="doc-section">
-                    <h2>Modules</h2>
-                    <p>Explore the various modules that make up the Water Framework ecosystem.</p>
-                </section>
-
-                <section id="core" class="doc-section">
-                    <h2>Core Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="implementation" class="doc-section">
-                    <h2>Implementation Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="repository" class="doc-section">
-                    <h2>Repository Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="jpa-repository" class="doc-section">
-                    <h2>JPA Repository Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="rest" class="doc-section">
-                    <h2>REST Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="user" class="doc-section">
-                    <h2>User Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="role" class="doc-section">
-                    <h2>Role Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="permission" class="doc-section">
-                    <h2>Permission Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="shared-entity" class="doc-section">
-                    <h2>Shared Entity Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="authentication" class="doc-section">
-                    <h2>Authentication Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="company" class="doc-section">
-                    <h2>Company Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="distribution" class="doc-section">
-                    <h2>Distribution Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="documents-manager" class="doc-section">
-                    <h2>Documents Manager Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="email" class="doc-section">
-                    <h2>Email Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="ethereum-connector" class="doc-section">
-                    <h2>Ethereum Connector Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="hadoop-connector" class="doc-section">
-                    <h2>Hadoop Connector Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="storage-s3" class="doc-section">
-                    <h2>Storage S3 Module</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="api-reference" class="doc-section">
-                    <h2>API Reference</h2>
-                    <div class="markdown-content"></div>
-                </section>
-
-                <section id="main-concepts" class="content-section">
-                    <div class="markdown-content"></div>
-                </section>
+                <!-- Content will be dynamically loaded by main.js -->
             </div>
         </div>
     </main>
