@@ -253,4 +253,90 @@ public class Document extends AbstractJpaEntity implements ExpandableEntity, Pro
 }
 ```
 
-This entity management system ensures that Water Framework applications have robust and flexible data persistence with full transaction control. 
+This entity management system ensures that Water Framework applications have robust and flexible data persistence with full transaction control.
+
+## Entity Extension (Expanding Entities)
+
+Water Framework supports entity expansion, allowing you to add custom fields and logic to existing entities without modifying the core entity code. This is useful for modular extensions and customizations.
+
+> **Important:**
+> When implementing an entity extension, you must extend `AbstractJpaEntityExpansion` (not `JpaAbstractEntity` or `JpaExpandableEntity`).
+> See the real example in `User/User-service/src/test/java/it/water/user/extension` for a working pattern.
+
+### Example: User Entity Extension
+
+**1. Extension Entity**
+```java
+package it.water.user.extension.entity;
+
+import it.water.repository.jpa.model.AbstractJpaEntityExpansion;
+import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class WaterUserExtension extends AbstractJpaEntityExpansion {
+    private String extensionField1;
+    private String extensionField2;
+}
+```
+
+**2. Repository Interface**
+```java
+package it.water.user.extension.api;
+
+import it.water.repository.jpa.api.WaterJpaRepository;
+import it.water.user.extension.entity.WaterUserExtension;
+
+public interface WaterUserExtensionRepository extends WaterJpaRepository<WaterUserExtension> {
+}
+```
+
+**3. Repository Implementation**
+```java
+package it.water.user.extension.repository;
+
+import it.water.core.interceptors.annotations.FrameworkComponent;
+import it.water.repository.jpa.WaterJpaRepositoryImpl;
+import it.water.user.extension.api.WaterUserExtensionRepository;
+import it.water.user.extension.entity.WaterUserExtension;
+
+@FrameworkComponent
+public class WaterUserExtensionRepositoryImpl extends WaterJpaRepositoryImpl<WaterUserExtension> implements WaterUserExtensionRepository {
+    public WaterUserExtensionRepositoryImpl() {
+        super(WaterUserExtension.class, "water-default-persistence-unit");
+    }
+}
+```
+
+**4. Extension Service**
+```java
+package it.water.user.extension;
+
+import it.water.core.api.model.BaseEntity;
+import it.water.core.api.service.EntityExtensionService;
+import it.water.core.interceptors.annotations.FrameworkComponent;
+import it.water.user.extension.entity.WaterUserExtension;
+import it.water.user.model.WaterUser;
+
+@FrameworkComponent(properties = EntityExtensionService.RELATED_ENTITY_PROPERTY+"=it.water.user.model.WaterUser")
+public class WaterUserExtensionService implements EntityExtensionService {
+    @Override
+    public Class<? extends BaseEntity> relatedType() {
+        return WaterUser.class;
+    }
+    @Override
+    public Class<? extends BaseEntity> type() {
+        return WaterUserExtension.class;
+    }
+}
+```
+
+### Key Points
+- **Always extend `AbstractJpaEntityExpansion`** for your extension entity.
+- Register your extension service as a `@FrameworkComponent` and set the `RELATED_ENTITY_PROPERTY` to the main entity class.
+- Implement the repository and service as shown above.
+
+For a complete, working example, see the test sources in `User/User-service/src/test/java/it/water/user/extension`. 

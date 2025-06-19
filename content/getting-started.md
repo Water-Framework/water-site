@@ -338,180 +338,162 @@ The generator will ask you several questions to configure your project. Here's w
 
 ### Step 4: Project Structure
 
-After generation, your project will have a multi-module structure following Water Framework conventions. Based on the configuration from the Book project example, here's what you'll get:
+After generation, your project will have a multi-module structure following Water Framework conventions. Here is an example based on the generated `WaterModule` project:
 
 #### Root Project Structure
 
 ```
-Book/                                    # Root project directory
-├── .yo-rc.json                         # Generator configuration (contains all your answers)
-├── build.gradle                        # Root build configuration
-├── settings.gradle                     # Project settings and module inclusion
-├── gradle.properties                   # Gradle properties and versions
-├── gradlew                             # Gradle wrapper script (Unix)
-├── gradlew.bat                         # Gradle wrapper script (Windows)
-├── gradle/                             # Gradle wrapper files
-├── .gitignore                          # Git ignore rules
-├── License.md                          # Project license
-├── README.md                           # Project documentation
-├── Book-api/                           # API module (interfaces and contracts)
-├── Book-model/                         # Model module (entities and data classes)
-├── Book-service/                       # Service module (business logic)
-└── Book-service-spring/                # Spring-specific implementation
+WaterModule/
+├── .yo-rc.json                # Generator configuration (all your answers)
+├── build.gradle               # Root build configuration
+├── settings.gradle            # Project settings and module inclusion
+├── gradle.properties          # Gradle properties and versions
+├── gradlew, gradlew.bat       # Gradle wrapper scripts
+├── gradle/                    # Gradle wrapper files
+├── .gitignore                 # Git ignore rules
+├── License.md                 # Project license
+├── README.md                  # Project documentation
+├── WaterModule-api/           # API module (interfaces and contracts)
+├── WaterModule-model/         # Model module (entities and data classes)
+├── WaterModule-service/       # Service module (business logic, OSGi support)
+└── WaterModule-service-spring/# Spring-specific implementation
 ```
 
-#### Module Structure
+#### Module Descriptions
 
-**Book-api Module** (Interfaces and Contracts)
-```
-Book-api/
-├── build.gradle                        # API module build configuration
-├── lombok.config                       # Lombok configuration
-├── README.md                           # API documentation
-└── src/
-    └── main/
-        └── java/
-            └── com/
-                └── book/
-                    └── api/
-                        ├── QuartaApi.java              # Entity API interface
-                        ├── QuartaRepository.java       # Repository interface
-                        ├── QuartaSystemApi.java        # System API interface
-                        ├── AuthorApi.java              # Additional entity APIs
-                        ├── EditorApi.java              # Additional entity APIs
-                        ├── TerzaApi.java               # Additional entity APIs
-                        ├── MyEntityNameApi.java        # Default entity API
-                        └── rest/                       # REST API interfaces
-```
+**WaterModule-api**
+- Contains all API interfaces for your entities and system APIs.
+- Example files:
+  - `NewEntityApi.java`: Main API interface for your entity, extends Water's `BaseEntityApi`.
+  - `NewEntitySystemApi.java`: System-level API for advanced operations.
+  - `NewEntityRepository.java`: Repository interface for data access.
+  - `rest/`: REST API interfaces for JAX-RS.
 
-**Book-model Module** (Entities and Data Classes)
-```
-Book-model/
-├── build.gradle                        # Model module build configuration
-├── lombok.config                       # Lombok configuration
-├── README.md                           # Model documentation
-└── src/
-    └── main/
-        └── java/
-            └── com/
-                └── book/
-                    └── model/
-                        ├── Quarta.java                 # Main entity class
-                        ├── Author.java                 # Additional entities
-                        ├── Editor.java                 # Additional entities
-                        ├── Terza.java                  # Additional entities
-                        └── MyEntityName.java           # Default entity
-```
+**WaterModule-model**
+- Contains your entity classes and data models.
+- Example file:
+  - `NewEntity.java`: The main entity, annotated for JPA, validation, and Water permissions. Includes fields, validation annotations, and role-based access control via `@AccessControl`.
 
-**Book-service Module** (Business Logic Implementation)
-```
-Book-service/
-├── build.gradle                        # Service module build configuration
-├── bnd.bnd                             # OSGi bundle configuration
-├── lombok.config                       # Lombok configuration
-├── README.md                           # Service documentation
-└── src/
-    └── main/
-        └── java/
-            └── com/
-                └── book/
-                    ├── repository/                     # Repository implementations
-                    │   ├── QuartaRepositoryImpl.java
-                    │   ├── AuthorRepositoryImpl.java
-                    │   ├── EditorRepositoryImpl.java
-                    │   ├── TerzaRepositoryImpl.java
-                    │   └── MyEntityNameRepositoryImpl.java
-                    └── service/                        # Service implementations
-                        ├── QuartaServiceImpl.java
-                        ├── AuthorServiceImpl.java
-                        ├── EditorServiceImpl.java
-                        ├── TerzaServiceImpl.java
-                        ├── MyEntityNameServiceImpl.java
-                        └── rest/                        # REST service implementations
-                            ├── QuartaRestApiImpl.java
-                            ├── AuthorRestApiImpl.java
-                            ├── EditorRestApiImpl.java
-                            ├── TerzaRestApiImpl.java
-                            └── MyEntityNameRestApiImpl.java
-```
+**WaterModule-service**
+- Contains business logic, repository implementations, and REST controllers.
+- Example files:
+  - `repository/NewEntityRepositoryImpl.java`: JPA repository implementation for your entity.
+  - `service/NewEntityServiceImpl.java`: Service implementation, business logic for your entity.
+  - `service/NewEntitySystemServiceImpl.java`: System service implementation.
+  - `service/rest/NewEntityRestControllerImpl.java`: JAX-RS REST controller for your entity, exposes CRUD endpoints.
+- Also contains OSGi-specific configuration (`bnd.bnd`).
 
-**Book-service-spring Module** (Spring Boot Implementation)
-```
-Book-service-spring/
-├── build.gradle                        # Spring module build configuration
-└── src/
-    └── main/
-        ├── java/
-        │   └── com/
-        │       └── book/
-        │           └── spring/                         # Spring-specific classes
-        └── resources/
-            ├── application.properties                  # Spring configuration
-            └── application.yml                         # Alternative config
-```
+**WaterModule-service-spring**
+- Contains Spring Boot application entry point and Spring-specific REST controllers.
+- Example files:
+  - `service/WaterModuleApplication.java`: Main Spring Boot application class, enables Water Framework and configures component scanning.
+  - `service/rest/spring/NewEntitySpringRestApi.java`: Spring REST API interface.
+  - `service/rest/spring/NewEntitySpringRestControllerImpl.java`: Spring REST controller implementation.
 
-#### Package Structure
-
-The generated project follows a consistent package structure:
-
-- **Base Package**: `com.book` (derived from your Group ID)
-- **API Package**: `com.book.api` - Contains interfaces and contracts
-- **Model Package**: `com.book.model` - Contains entity classes
-- **Repository Package**: `com.book.repository` - Contains repository implementations
-- **Service Package**: `com.book.service` - Contains business logic implementations
-- **REST Package**: `com.book.service.rest` - Contains REST API implementations
+#### Test Structure
+- Each service module contains test classes for both JUnit and Karate (API and integration tests):
+  - `WaterModule-service/src/test/java/it/water/module/NewEntityApiTest.java`: JUnit tests for service and API logic.
+  - `WaterModule-service/src/test/java/it/water/module/WaterModuleRestApiTest.java`: Karate tests for REST API (OSGi/standalone).
+  - `WaterModule-service-spring/src/test/java/it/water/module/WaterModuleRestSpringApiTest.java`: Karate tests for REST API (Spring Boot).
 
 #### Configuration Files
+- **.yo-rc.json**: Contains all generator answers and configuration for reproducibility.
+- **build.gradle/settings.gradle**: Multi-module Gradle configuration, applies Water workspace plugin.
 
-**Root build.gradle** - Defines common configuration for all modules:
-```gradle
-allprojects {
-    project.ext.BookVersion = project.waterVersion
-    group 'com.book'
-    version project.BookVersion
-    // Repository configuration
-    // Common plugins (java, maven-publish, jacoco)
-}
+---
+
+### What to do next?
+
+1. **Customize Your Entity**
+   - Edit `WaterModule-model/src/main/java/it/water/module/model/NewEntity.java` to add or modify fields, validation, and business rules.
+   - Adjust role and permission annotations as needed.
+
+2. **Align and Expand Test Classes**
+   - Update or add JUnit tests in `WaterModule-service/src/test/java/it/water/module/NewEntityApiTest.java` to cover your business logic.
+   - Add or update Karate feature files and tests for REST endpoints.
+
+3. **Implement Custom Logic**
+   - Add business logic in `NewEntityServiceImpl.java` or custom REST endpoints in `NewEntityRestControllerImpl.java` or `NewEntitySpringRestControllerImpl.java`.
+
+4. **Configure for Your Environment**
+   - Adjust `application.properties` or `application.yml` in the Spring module for database, ports, and other settings.
+
+---
+
+### How to Run the Generated Module
+
+#### Run with Spring Boot
+```bash
+cd WaterModule/WaterModule-service-spring
+./../../gradlew bootRun
+```
+- The application will start on a random port (see logs or set `server.port` in properties).
+- Access REST endpoints at `http://localhost:<port>/waterModules`.
+
+#### Run with OSGi (Karaf)
+
+First, download the Karaf Water basic distribution:
+
+[Download water-karaf-distribution-3.0.0.zip](https://nexus.acsoftware.it/nexus/repository/maven-water/it/water/container/water-karaf-distribution/3.0.0/water-karaf-distribution-3.0.0.zip)
+
+Unzip the distribution and follow the instructions in the README to start the Karaf container.
+
+Deploy the generated OSGi bundles to your Karaf container. For details on installing bundles in Karaf, see the [Apache Karaf documentation on bundle installation](https://karaf.apache.org/manual/latest/#_deploying_bundles).
+
+- Access REST endpoints at the configured context root after deployment.
+
+#### Run JUnit Tests
+```bash
+cd WaterModule
+./gradlew test
+```
+- Runs all JUnit tests, including service and API logic.
+
+#### Run Karate API Tests
+```bash
+cd WaterModule
+./gradlew test
+```
+- Karate tests are integrated and will run as part of the test suite.
+- For Spring Boot-specific Karate tests:
+```bash
+cd WaterModule/WaterModule-service-spring
+./../../gradlew test
 ```
 
-**settings.gradle** - Configures the multi-module project:
-```gradle
-// Water Framework workspace plugin
-apply plugin: 'it.water.workspace'
-```
+---
 
-**.yo-rc.json** - Contains all your generator answers:
-```json
-{
-  "generator-water": {
-    "projectName": "Book",
-    "projectGroupId": "com.book",
-    "projectTechnology": "water",
-    "hasRestServices": true,
-    "restContextRoot": "/books",
-    "isProtectedEntity": true,
-    "isOwnedEntity": false,
-    // ... all other configuration
-  }
-}
-```
-
-#### Key Features of Generated Structure
-
-1. **Multi-Module Architecture**: Separates concerns into API, Model, and Service modules
-2. **Cross-Framework Support**: Includes both generic (Book-service) and framework-specific (Book-service-spring) modules
-3. **Consistent Naming**: All modules follow the pattern `{ProjectName}-{ModuleType}`
-4. **Package Organization**: Clear separation of interfaces, models, and implementations
-5. **Build Configuration**: Each module has its own build.gradle with appropriate dependencies
-6. **Framework Integration**: Ready for Spring Boot, OSGi, or standalone deployment
+You now have a fully functional, modular Water Framework project ready for customization, testing, and deployment on your preferred Java runtime!
 
 ## Running Your Project
 
 ### Step 5: Build the Project
 
+You can build your project using either the Water Generator or directly with Gradle.
+
+#### Build with Water Generator
+
+To build all modules in your workspace:
+```bash
+yo water:build-all
+```
+
+To build specific projects:
+```bash
+yo water:build --projects Project1,Project2
+```
+
+- The generator will handle dependency analysis, build order, and run all necessary build steps for you.
+- If you want to include tests in the build, you can use:
+```bash
+yo water:build-all --withTests
+```
+
+#### Build with Gradle
+
 ```bash
 # Navigate to your project directory
-cd my-water-app
+cd WaterModule
 
 # Build the project
 ./gradlew build
@@ -523,188 +505,3 @@ This command:
 - Runs tests
 - Creates executable JAR files
 
-### Step 6: Running in Different Environments
-
-#### Running with Spring Boot
-
-```bash
-# Run the Spring Boot application
-./gradlew bootRun
-
-# Or run the JAR file
-java -jar build/libs/my-water-app-spring-boot.jar
-```
-
-**What happens:**
-- Starts embedded Tomcat server
-- Initializes Spring context
-- Loads Water Framework components
-- Connects to database
-- Application available at `http://localhost:8080`
-
-#### Running with OSGi (Karaf)
-
-```bash
-# Build OSGi bundles
-./gradlew build
-
-# Start Karaf container
-./gradlew karafStart
-
-# Deploy bundles to Karaf
-./gradlew karafDeploy
-```
-
-**What happens:**
-- Starts Apache Karaf OSGi container
-- Deploys your application as OSGi bundles
-- Activates Water Framework components
-- Application available at `http://localhost:8181`
-
-#### Running Tests
-
-```bash
-# Run all tests
-./gradlew test
-
-# Run specific test class
-./gradlew test --tests UserServiceTest
-
-# Run tests with coverage report
-./gradlew test jacocoTestReport
-```
-
-**Test reports available at:**
-- `build/reports/tests/test/index.html` - Test results
-- `build/reports/jacoco/test/html/index.html` - Coverage report
-
-### Step 7: Accessing Your Application
-
-#### Spring Boot Application
-- **Main Application**: `http://localhost:8080`
-- **Swagger API Docs**: `http://localhost:8080/swagger-ui.html`
-- **Health Check**: `http://localhost:8080/actuator/health`
-
-#### OSGi Application
-- **Main Application**: `http://localhost:8181`
-- **Karaf Console**: `http://localhost:8181/system/console`
-- **Bundle Status**: `http://localhost:8181/system/console/bundles`
-
-## Water Framework Key Features
-
-Water Framework provides several "out of the box" features:
-
-### Core Features
-- **User Management**: Complete user lifecycle management
-- **Granular Permission System**: Role-based access control with fine-grained permissions
-- **Cross-Framework Support**: Write once, run on Spring, OSGi, Quarkus, or Standalone
-- **Event System**: Built-in event handling for real-time applications
-- **Repository Pattern**: Unified data access layer
-- **REST API Support**: Automatic REST endpoint generation
-- **Validation Framework**: Comprehensive data validation
-
-### Modular Architecture
-- **100% Modular Design**: Based on SOLID principles
-- **Component Registry**: Centralized component management
-- **Interceptor System**: AOP-like functionality for cross-cutting concerns
-- **Service Integration**: Easy integration with external services
-
-### Technology Integrations
-- **Database Support**: H2, PostgreSQL, MySQL, Oracle, SQL Server
-- **Document Management**: File storage and version control
-- **Email System**: Automated email notifications
-- **Blockchain Integration**: Ethereum connector support
-- **Cloud Storage**: S3 integration for document persistence
-- **Big Data**: Hadoop connector for data processing
-
-## Next Steps
-
-### Development Workflow
-
-1. **Start Development Server**
-   ```bash
-   ./gradlew bootRun
-   ```
-
-2. **Make Changes** - Edit your Java files, the server will auto-reload
-
-3. **Run Tests**
-   ```bash
-   ./gradlew test
-   ```
-
-4. **Build for Production**
-   ```bash
-   ./gradlew build
-   ```
-
-### Useful Commands
-
-```bash
-# Clean build
-./gradlew clean build
-
-# Run with specific profile
-./gradlew bootRun --args='--spring.profiles.active=dev'
-
-# Generate project documentation
-./gradlew javadoc
-
-# Check for dependency updates
-./gradlew dependencyUpdates
-
-# Run security scan
-./gradlew dependencyCheckAnalyze
-```
-
-### Adding New Features
-
-```bash
-# Add a new entity
-yo water:add-entity
-
-# Add REST services
-yo water:add-rest-services
-
-# Create entity extension
-yo water:new-entity-extension
-```
-
-### Troubleshooting
-
-**Common Issues:**
-
-1. **Port already in use**
-   ```bash
-   # Change port in application.properties
-   server.port=8081
-   ```
-
-2. **Database connection issues**
-   ```bash
-   # Check database configuration in application.properties
-   # Ensure database is running
-   ```
-
-3. **Memory issues**
-   ```bash
-   # Increase JVM memory
-   ./gradlew bootRun -Dorg.gradle.jvmargs="-Xmx2g"
-   ```
-
-4. **Node.js version issues**
-   ```bash
-   # Switch to required Node.js version
-   nvm use 18.20.8
-   ```
-
-## Water Framework Philosophy
-
-Water Framework follows the principle: *"Be water, my friend"* - like water, it takes the form of the container that incorporates it. This means:
-
-- **Cross-Framework Compatibility**: Your code can run on Spring, OSGi, Quarkus, or Standalone
-- **Modular Design**: Components can be easily added, removed, or modified
-- **Convention over Coding**: Follows established patterns to reduce development time
-- **Flexible Architecture**: Supports monolithic, microservices, or hybrid approaches
-
-This completes your setup! You now have a fully functional Water Framework application running with enterprise features like authentication, user management, and REST APIs. The framework's modular design allows you to start simple and scale as your needs grow.
