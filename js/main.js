@@ -113,13 +113,20 @@ class MenuManager {
     }
 
     initializeDefaultSection() {
-        // Find and highlight the Core Concepts section by default
-        const coreConceptsLink = utils.getElement('a[href="#core-concepts"]');
-        if (coreConceptsLink) {
-            coreConceptsLink.classList.add(CLASSES.ACTIVE);
-            // Load the core concepts content
-            if (coreConceptsLink.hasAttribute('data-md')) {
-                ContentLoader.loadLocalContent(coreConceptsLink.getAttribute('data-md'));
+        // Find and highlight the Introduction section by default
+        const introductionLink = utils.getElement('a[href="#introduction"]');
+        if (introductionLink) {
+            introductionLink.classList.add(CLASSES.ACTIVE);
+            // Load the introduction content
+            if (introductionLink.hasAttribute('data-md')) {
+                ContentLoader.loadLocalContent(introductionLink.getAttribute('data-md'));
+            }
+        } else {
+            // Fallback: if no introduction link found, try to load the first available section
+            const firstSectionLink = utils.getElement('a[data-md]');
+            if (firstSectionLink) {
+                firstSectionLink.classList.add(CLASSES.ACTIVE);
+                ContentLoader.loadLocalContent(firstSectionLink.getAttribute('data-md'));
             }
         }
     }
