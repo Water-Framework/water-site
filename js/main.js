@@ -173,6 +173,9 @@ class MenuManager {
         const currentSubmenu = link.closest('.sub-menu');
         const parentLi = currentSubmenu.parentElement;
         parentLi.classList.add(CLASSES.SHOW_SUBMENU);
+        
+        // Scroll to top of the page
+        window.scrollTo(0, 0);
     }
 
     initializeTopMenuItems() {
@@ -210,6 +213,9 @@ class MenuManager {
         }
         
         this.handleSubmenuVisibility(link);
+        
+        // Scroll to top of the page
+        window.scrollTo(0, 0);
     }
 
     handleSubmenuVisibility(link) {

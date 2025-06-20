@@ -82,37 +82,6 @@ public class User extends AbstractJpaEntity implements ProtectedEntity {
 }
 ```
 
-### Validation Groups
-
-Water Framework supports validation groups for different validation scenarios:
-
-```java
-@Entity
-@Table(name = "documents")
-public class Document extends AbstractJpaEntity implements ProtectedEntity {
-    
-    @NotNull(groups = {CreateGroup.class, UpdateGroup.class})
-    @Size(min = 1, max = 255, groups = {CreateGroup.class, UpdateGroup.class})
-    @Column(name = "title")
-    private String title;
-    
-    @NotNull(groups = CreateGroup.class)
-    @Column(name = "content", columnDefinition = "TEXT")
-    private String content;
-    
-    @Min(value = 0, groups = {CreateGroup.class, UpdateGroup.class})
-    @Max(value = 1000000, groups = {CreateGroup.class, UpdateGroup.class})
-    @Column(name = "file_size")
-    private Long fileSize;
-    
-    // Validation groups
-    public interface CreateGroup {}
-    public interface UpdateGroup {}
-    
-    // Getters and setters...
-}
-```
-
 ## Water Framework Custom Validations
 
 The Core-validation module provides specialized validation annotations that extend beyond standard Jakarta validation capabilities.
@@ -272,24 +241,6 @@ public class DocumentSystemApiImpl extends BaseEntitySystemServiceImpl<Document>
         }
     }
 }
-```
-
-## Validation Configuration
-
-Water Framework validation can be configured through properties:
-
-```properties
-# Enable/disable automatic validation
-water.validation.enabled=true
-
-# Validation groups to apply
-water.validation.groups=default
-
-# Custom validator timeout (ms)
-water.validation.timeout=5000
-
-# Enable detailed validation messages
-water.validation.detailed-messages=true
 ```
 
 This validation system ensures that all entities in Water Framework applications are properly validated according to both standard and custom business rules, providing robust data integrity and security. 

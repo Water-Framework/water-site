@@ -78,18 +78,6 @@ public Document getSharedDocument(String id) {
 }
 ```
 
-#### **@NoPermissionCheck - Bypass Permission Checking**
-Bypasses permission checking (use with caution):
-
-```java
-@NoPermissionCheck
-public List<Document> getPublicDocuments() {
-    // This method bypasses permission checking
-    // Use only for truly public data
-    return findAll();
-}
-```
-
 ### Complete API Service Example
 
 ```java
@@ -134,14 +122,6 @@ public class DocumentApi extends BaseEntityApi<Document> {
         doc.setArchived(true);
         return updateDocument(doc);
     }
-    
-    // Method that doesn't require permission checking (use with caution)
-    @NoPermissionCheck
-    public List<Document> getPublicDocuments() {
-        // This method bypasses permission checking
-        // Use only for truly public data
-        return findAll();
-    }
 }
 ```
 
@@ -158,66 +138,6 @@ public class DocumentApi extends BaseEntityApi<Document> {
 5. **Document Custom Actions**: Clearly document any custom actions defined in your entities
 6. **Use Return Permissions Carefully**: `@AllowPermissionsOnReturn` should only be used when the returned object needs permission validation
 7. **Avoid Generic Permissions for Sensitive Operations**: Use specific permissions for operations that modify or delete data
-
-### Integration Modules for Cross-Module Communication
-
-Each module can define its own integration module to be invoked by other modules via REST or other technologies:
-
-#### **Integration Client Pattern**
-```java
-@FrameworkComponent(priority = 2)
-public class SharedEntityTestClient implements SharedEntityIntegrationClient {
-    @Override
-    public Collection<Long> fetchSharingUsersIds(String resourceName, long resourceId) {
-        // Implementation for cross-module communication
-        return List.of(1L);
-    }
-}
-```
-
-#### **REST Integration Examples**
-Modules can expose REST APIs for integration:
-
-```java
-@ExtendWith(WaterTestExtension.class)
-public class SharedEntityRestApiTest implements Service {
-
-    @Inject
-    @Setter
-    private ComponentRegistry componentRegistry;
-
-    @Inject
-    @Setter
-    private UserIntegrationClient userIntegrationClient;
-
-    @Karate.Test
-    Karate restInterfaceTest() {
-        return Karate.run("classpath:karate")
-                .systemProperty("webServerPort", TestRuntimeInitializer.getInstance().getRestServerPort())
-                .systemProperty("host", "localhost")
-                .systemProperty("protocol", "http");
-    }
-}
-```
-
-#### **Service-to-Service Integration**
-Modules can directly inject and use services from other modules:
-
-```java
-@FrameworkComponent
-public class TestServiceImpl extends BaseServiceImpl implements TestServiceApi {
-    
-    @Inject
-    @Setter
-    @Getter
-    private TestSystemServiceApi systemService;
-
-    @Override
-    public void doSomething() {
-        this.getSystemService().doSomething();
-    }
-}
-```
 
 ### Key Security Principles
 

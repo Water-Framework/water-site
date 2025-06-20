@@ -20,10 +20,48 @@ public class DocumentService implements DocumentApi {
 - **Dependency Injection**: Automatic injection of required dependencies
 - **Lifecycle Management**: Framework manages component lifecycle
 - **Priority Control**: Optional priority setting for component initialization order
+- **Properties Support**: Developers can add properties to the annotation for configuration
+
+### Component Properties
+
+The `@FrameworkComponent` annotation supports properties that can be used for configuration and filtering:
+
+```java
+@FrameworkComponent(services = ServiceInterface.class, priority = 3, properties = {
+        "filter=value"
+})
+public class ServiceInterfaceImpl3 implements ServiceInterface {
+    @Setter
+    @Getter
+    private String filter; // Required field for Spring property mapping
+    
+    @Override
+    public String doThing() {
+        return "FILTERED BEAN!";
+    }
+}
+
+@FrameworkComponent(services = ServiceInterface.class, priority = 2)
+public class ServiceInterfaceImpl2 implements ServiceInterface {
+    // Component with priority only
+}
+
+@FrameworkComponent(services = ServiceInterface.class)
+public class ServiceInterfaceImpl1 implements ServiceInterface {
+    // Component with default priority (1)
+}
+```
+
+**Properties Usage:**
+- **Configuration**: Properties can be used to configure component behavior
+- **Filtering**: Properties enable component filtering using ComponentFilter
+- **Spring Integration**: Properties work seamlessly with Spring framework
+- **Spring Property Mapping**: For Spring support, properties defined in the annotation must have corresponding fields in the component class
+- **Framework Context**: Properties are available in the framework context for other components to access
 
 ### Component Priority
 
-Components can specify initialization priority using the `priority` attribute:
+Components can specify initialization priority using the `priority` attribute. The priority system works as follows:
 
 ```java
 @FrameworkComponent(priority = 1)
@@ -41,6 +79,12 @@ public class LowPriorityService implements ServiceApi {
     // Low priority component - initialized last
 }
 ```
+
+**Priority Model:**
+- **Lower Numbers = Higher Priority**: Priority 1 is the highest priority
+- **Default Priority**: Framework components have a default priority of 1 (lowest priority)
+- **Component Resolution**: When using `findComponent()`, the registry returns the component with the highest priority
+- **Multiple Components**: Use `findComponents()` to retrieve all registered components for a given interface
 
 ## Lifecycle Methods
 
@@ -63,9 +107,10 @@ public class DocumentService implements DocumentApi {
     }
     
     @OnActivate
-    public void onActivateWithParams(@Param("config") String config) {
-        // Activation with parameters
-        log.info("DocumentService activated with config: {}", config);
+    public void onActivateWithComponents(ComponentRegistry componentRegistry, ApplicationProperties appProperties) {
+        // Activation with component parameters
+        log.info("DocumentService activated with registry and properties");
+        // Use componentRegistry and appProperties directly
     }
     
     private void initializeCache() {
@@ -76,9 +121,11 @@ public class DocumentService implements DocumentApi {
 
 **Activation Method Characteristics:**
 - **Automatic Execution**: Called automatically when component is activated
-- **Parameter Injection**: Can receive parameters from configuration
+- **Component Parameters**: Can receive other components as parameters (not primitive types)
 - **Multiple Methods**: Component can have multiple activation methods
 - **Exception Handling**: Framework handles activation exceptions gracefully
+- **Framework Context Parameters**: Parameters are searched inside the framework context as components
+- **Injection Timing**: Note that `@Inject` happens after activation, so injected fields will be null inside activation methods
 
 ### @OnDeactivate Annotation
 
@@ -96,11 +143,10 @@ public class DocumentService implements DocumentApi {
     }
     
     @OnDeactivate
-    public void onDeactivateWithParams(@Param("cleanup") boolean cleanup) {
-        // Deactivation with parameters
-        if (cleanup) {
-            performCleanup();
-        }
+    public void onDeactivateWithComponents(ComponentRegistry componentRegistry) {
+        // Deactivation with component parameters
+        log.info("DocumentService deactivated with registry");
+        performCleanup();
     }
     
     private void cleanup() {
@@ -115,47 +161,46 @@ public class DocumentService implements DocumentApi {
 
 **Deactivation Method Characteristics:**
 - **Automatic Execution**: Called automatically when component is deactivated
-- **Parameter Injection**: Can receive parameters from configuration
+- **Component Parameters**: Can receive other components as parameters
 - **Cleanup Operations**: Ideal for resource cleanup and shutdown tasks
 - **Graceful Shutdown**: Ensures proper resource release
 
 ## Parameter Injection
 
-### @Param Annotation
+### Framework Context Parameters
 
-The `@Param` annotation allows injection of configuration parameters into lifecycle methods:
+Parameters passed to lifecycle methods are searched inside the framework context as components:
 
 ```java
 @FrameworkComponent
 public class ConfigurableService implements ServiceApi {
     
     @OnActivate
-    public void onActivate(@Param("service.name") String serviceName,
-                          @Param("service.timeout") int timeout,
-                          @Param("service.enabled") boolean enabled) {
+    public void onActivate(ComponentRegistry componentRegistry, ApplicationProperties appProperties) {
+        // Parameters are searched in framework context as components
+        log.info("Service activated with registry and properties");
         
-        log.info("Service {} activated with timeout: {}, enabled: {}", 
-                serviceName, timeout, enabled);
-        
-        if (enabled) {
-            initializeService(timeout);
+        // Use the components directly
+        String configValue = appProperties.getProperty("service.config");
+        if (configValue != null) {
+            initializeService(configValue);
         }
     }
     
     @OnDeactivate
-    public void onDeactivate(@Param("cleanup.on.shutdown") boolean cleanup) {
-        if (cleanup) {
-            performCleanup();
-        }
+    public void onDeactivate(ComponentRegistry componentRegistry) {
+        // Use component registry for cleanup
+        log.info("Service deactivated");
+        performCleanup();
     }
 }
 ```
 
 **Parameter Injection Features:**
-- **Configuration Source**: Parameters come from framework configuration
-- **Type Conversion**: Automatic conversion to appropriate types
-- **Default Values**: Can provide default values for missing parameters
-- **Validation**: Framework validates parameter types and values
+- **Framework Context**: Parameters come from framework context as components
+- **Component Resolution**: Framework resolves parameters as registered components
+- **Type Matching**: Parameters must match registered component types
+- **Activation Timing**: Parameters are available during activation, unlike `@Inject` fields
 
 ## Dependency Injection
 
@@ -201,6 +246,7 @@ public class DocumentService implements DocumentApi {
 - **Circular Dependency Detection**: Built-in detection and prevention
 - **Lazy Loading**: Dependencies are injected only when needed
 - **Interface Implementation**: Can inject by interface or implementation
+- **Post-Activation**: Injection happens after activation methods are called
 
 ## Component Registry
 
@@ -225,7 +271,13 @@ public class ComponentManager {
     }
     
     public <T> T getComponent(Class<T> componentType) {
-        return componentRegistry.findComponent(componentType);
+        // Returns the highest priority component
+        return componentRegistry.findComponent(componentType, null);
+    }
+    
+    public <T> List<T> getAllComponents(Class<T> componentType) {
+        // Returns all registered components for the type
+        return componentRegistry.findComponents(componentType, null);
     }
     
     public Component getComponentByName(String name) {
@@ -250,39 +302,11 @@ public class ComponentManager {
 
 **ComponentRegistry Features:**
 - **Component Discovery**: Find components by type or name
+- **Priority Resolution**: `findComponent()` returns the highest priority component
+- **Multiple Components**: `findComponents()` returns all components for a type
 - **Lifecycle Control**: Activate/deactivate components programmatically
 - **Status Monitoring**: Check component status and health
 - **Dependency Analysis**: Analyze component dependencies
-
-## Lifecycle Events
-
-### Component Lifecycle Events
-
-Water Framework generates events for component lifecycle changes:
-
-```java
-@FrameworkComponent
-public class ComponentLifecycleListener implements ComponentActivatedEvent, ComponentDeactivatedEvent {
-    
-    @Override
-    public void onComponentActivated(Component component) {
-        log.info("Component activated: {}", component.getName());
-        // Handle component activation
-    }
-    
-    @Override
-    public void onComponentDeactivated(Component component) {
-        log.info("Component deactivated: {}", component.getName());
-        // Handle component deactivation
-    }
-}
-```
-
-**Available Lifecycle Events:**
-- **ComponentActivatedEvent**: Fired when component is activated
-- **ComponentDeactivatedEvent**: Fired when component is deactivated
-- **ComponentInitializedEvent**: Fired when component is initialized
-- **ComponentDestroyedEvent**: Fired when component is destroyed
 
 ## Best Practices
 
@@ -294,7 +318,7 @@ public class ResourceIntensiveService implements ServiceApi {
     private ExecutorService executorService;
     
     @OnActivate
-    public void onActivate() {
+    public void onActivate(ComponentRegistry componentRegistry) {
         // Initialize resources
         executorService = Executors.newFixedThreadPool(10);
         log.info("ResourceIntensiveService activated with thread pool");
@@ -324,8 +348,10 @@ public class ResourceIntensiveService implements ServiceApi {
 public class ConfigurableComponent implements ServiceApi {
     
     @OnActivate
-    public void onActivate(@Param("component.enabled") boolean enabled,
-                          @Param("component.max.connections") int maxConnections) {
+    public void onActivate(ApplicationProperties appProperties, ComponentRegistry componentRegistry) {
+        // Parameters are resolved from framework context as components
+        boolean enabled = Boolean.parseBoolean(appProperties.getProperty("component.enabled", "false"));
+        int maxConnections = Integer.parseInt(appProperties.getProperty("component.max.connections", "10"));
         
         if (enabled) {
             initializeWithConfig(maxConnections);
@@ -342,7 +368,7 @@ public class ConfigurableComponent implements ServiceApi {
 public class RobustComponent implements ServiceApi {
     
     @OnActivate
-    public void onActivate() {
+    public void onActivate(ComponentRegistry componentRegistry) {
         try {
             // Activation logic
             initializeComponent();
