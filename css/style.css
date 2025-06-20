@@ -442,6 +442,8 @@ footer {
 /* Documentation Page */
 .documentation {
     padding-top: 80px;
+    height: calc(100vh - 80px);
+    overflow: hidden;
 }
 
 .docs-container {
@@ -450,13 +452,35 @@ footer {
     margin: 0 auto;
     padding: 2rem;
     gap: 2rem;
+    height: 100%;
 }
 
 .docs-sidebar {
     flex: 0 0 250px;
     position: sticky;
     top: 2rem;
-    height: fit-content;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 1rem;
+}
+
+.docs-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.docs-sidebar::-webkit-scrollbar-track {
+    background: rgba(241, 241, 241, 0.3);
+    border-radius: 3px;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(193, 193, 193, 0.5);
+    border-radius: 3px;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 168, 168, 0.7);
 }
 
 .docs-sidebar nav ul {
@@ -545,9 +569,29 @@ footer {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
+    overflow-x: hidden;
     background-color: var(--background-color);
     max-width: 1200px;
     margin: 0 auto;
+    height: calc(100vh - 120px);
+}
+
+.docs-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.docs-content::-webkit-scrollbar-track {
+    background: rgba(241, 241, 241, 0.3);
+    border-radius: 4px;
+}
+
+.docs-content::-webkit-scrollbar-thumb {
+    background: rgba(193, 193, 193, 0.5);
+    border-radius: 4px;
+}
+
+.docs-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 168, 168, 0.7);
 }
 
 .doc-section {
@@ -727,19 +771,43 @@ footer {
 
 /* Responsive styles */
 @media (max-width: 768px) {
+    .documentation {
+        height: auto;
+        overflow: visible;
+    }
+    
     .docs-container {
         flex-direction: column;
         padding: 1rem;
+        height: auto;
     }
 
     .docs-sidebar {
-        position: static;
         width: 100%;
-        margin-bottom: 2rem;
+        max-width: 100%;
+        position: fixed;
+        top: 60px;
+        left: -100%;
+        height: calc(100vh - 60px);
+        z-index: 999;
+        transition: left 0.3s ease;
+        background: white;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1rem;
+    }
+
+    .docs-sidebar.active {
+        left: 0;
     }
 
     .docs-content {
+        margin-left: 0;
+        padding: 1rem;
         width: 100%;
+        height: auto;
+        overflow: visible;
     }
 }
 
@@ -888,6 +956,9 @@ footer {
         transition: left 0.3s ease;
         background: white;
         box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1rem;
     }
 
     .docs-sidebar.active {
@@ -898,6 +969,8 @@ footer {
         margin-left: 0;
         padding: 1rem;
         width: 100%;
+        height: auto;
+        overflow: visible;
     }
 
     /* Mobile Sidebar Toggle */
