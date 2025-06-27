@@ -213,8 +213,15 @@ class MenuManager {
         // Add active class to clicked item
         link.classList.add(CLASSES.ACTIVE);
         
-        // If it has data-md attribute, load local content
-        if (link.hasAttribute('data-md')) {
+        // Check if this section has subsections
+        const parentLi = link.parentElement;
+        const subMenu = parentLi.querySelector('.sub-menu');
+        
+        if (subMenu && subMenu.children.length > 0) {
+            // Generate TOC content for sections with subsections
+            this.generateSectionTOC(link, subMenu);
+        } else if (link.hasAttribute('data-md')) {
+            // Load local content for sections without subsections
             utils.log('Data MD:', link.getAttribute('data-md'));
             ContentLoader.loadLocalContent(link.getAttribute('data-md'));
         }
@@ -223,6 +230,166 @@ class MenuManager {
         
         // Scroll to top of the page
         window.scrollTo(0, 0);
+    }
+
+    generateSectionTOC(sectionLink, subMenu) {
+        const sectionTitle = sectionLink.textContent;
+        const sectionId = sectionLink.getAttribute('href').substring(1);
+        const subMenuItems = Array.from(subMenu.querySelectorAll('a'));
+        
+        // Get section descriptions from a mapping
+        const sectionDescriptions = this.getSectionDescriptions();
+        const description = sectionDescriptions[sectionId] || `Explore the ${sectionTitle.toLowerCase()} concepts and features of Water Framework.`;
+        
+        let tocHTML = `
+            <div class="section-overview">
+                <h1>${sectionTitle}</h1>
+                <p class="section-description">${description}</p>
+                
+                <div class="section-toc">
+                    <h2>📚 Table of Contents</h2>
+                    <div class="toc-grid">
+        `;
+        
+        subMenuItems.forEach((item, index) => {
+            const itemTitle = item.textContent;
+            const itemHref = item.getAttribute('href');
+            const hasRemoteMd = item.hasAttribute('remote-md');
+            const hasDataMd = item.hasAttribute('data-md');
+            
+            tocHTML += `
+                <div class="toc-item" data-href="${itemHref}" data-remote="${hasRemoteMd ? item.getAttribute('remote-md') : ''}" data-md="${hasDataMd ? item.getAttribute('data-md') : ''}">
+                    <div class="toc-number">${(index + 1).toString().padStart(2, '0')}</div>
+                    <div class="toc-content">
+                        <h3>${itemTitle}</h3>
+                        <p>${this.getSubsectionDescription(itemTitle, sectionId)}</p>
+                    </div>
+                    <div class="toc-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            `;
+        });
+        
+        tocHTML += `
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const docsContent = utils.getElement(SELECTORS.DOCS_CONTENT);
+        docsContent.innerHTML = tocHTML;
+        
+        // Add click handlers to TOC items
+        this.initializeTOCItemHandlers();
+    }
+
+    getSectionDescriptions() {
+        return {
+            'basic-concepts': 'Core concepts and fundamental building blocks of Water Framework, including service architecture, entity management, security, and component lifecycle.',
+            'persistence': 'Comprehensive data access and persistence layer providing JPA repository framework, query system, and entity extensions.',
+            'permission': 'Advanced permission system for fine-grained access control, role management, and custom permission checking.',
+            'rest-api': 'REST API framework for building web services with security, documentation, and versioning capabilities.',
+            'architecture': 'System architecture overview, component interaction flows, and security patterns for enterprise applications.',
+            'clustering': 'Clustering and distributed computing capabilities for high availability and scalability.',
+            'microservices': 'Microservices architecture support including service discovery, mesh integration, and distributed tracing.',
+            'best-practices': 'Development patterns, testing strategies, and performance optimization guidelines.',
+            'implementations': 'Framework implementations for Spring, OSGi, and Quarkus with integration examples.',
+            'modules': 'Ready-to-use modules providing authentication, document management, blockchain integration, and more.'
+        };
+    }
+
+    getSubsectionDescription(subsectionTitle, sectionId) {
+        const descriptions = {
+            'basic-concepts': {
+                'Service Architecture': 'Learn about the service layer architecture and API design patterns.',
+                'Entity Management': 'Understand entity lifecycle, validation, and management patterns.',
+                'Water Resources and Entities': 'Explore resource management and entity relationships.',
+                'Shared Entities': 'Discover how to work with shared and collaborative entities.',
+                'Validation': 'Implement comprehensive validation strategies for your entities.',
+                'Event Management': 'Handle events and notifications in your applications.',
+                'Security & Permissions': 'Implement fine-grained security and permission controls.',
+                'Component Lifecycle': 'Manage component initialization, activation, and cleanup.',
+                'Interceptors & AOP': 'Use aspect-oriented programming for cross-cutting concerns.'
+            },
+            'persistence': {
+                'JPA Repository Framework': 'Core repository pattern implementation with transaction management.',
+                'Query & Filter System': 'Powerful query building and filtering capabilities.',
+                'Entity Extensions & Validation': 'Extend entities with custom functionality and validation.'
+            },
+            'permission': {
+                'Permission Annotations Management': 'Learn how to use permission annotations for automatic access control.',
+                'Defining Roles and Permission for Your Entities': 'Configure roles and permissions for your domain entities.',
+                'Custom Checking Permissions': 'Implement custom permission checking logic for complex scenarios.',
+                'Custom Permission Manager': 'Create custom permission managers for specialized access control needs.'
+            },
+            'rest-api': {
+                'REST Service Layer': 'Build RESTful web services with automatic endpoint generation.',
+                'REST Security & Integration': 'Secure your REST APIs with authentication and authorization.',
+                'API Documentation & Versioning': 'Generate API documentation and manage versioning.'
+            },
+            'architecture': {
+                'System Architecture Overview': 'High-level system architecture and design principles.',
+                'Component Interaction Flows': 'Understand how components communicate and interact.',
+                'Security & Permission Flows': 'Security patterns and permission checking flows.'
+            },
+            'clustering': {
+                'Clustering Overview': 'Introduction to clustering concepts and capabilities.',
+                'Distributed Components': 'Build and deploy distributed components.',
+                'Cluster Coordination': 'Coordinate activities across cluster nodes.'
+            },
+            'microservices': {
+                'Microservices Overview': 'Microservices architecture and design patterns.',
+                'Service Discovery': 'Discover and register services in a distributed environment.',
+                'Service Mesh Integration': 'Integrate with service mesh technologies.',
+                'Distributed Tracing': 'Trace requests across microservice boundaries.'
+            },
+            'best-practices': {
+                'Development Patterns': 'Recommended development patterns and practices.',
+                'Testing Strategies': 'Comprehensive testing approaches and strategies.',
+                'Performance & Scalability': 'Optimize performance and ensure scalability.'
+            },
+            'implementations': {
+                'Spring Integration': 'Integrate Water Framework with Spring Boot applications.',
+                'OSGi Integration': 'Use Water Framework in OSGi environments.',
+                'Quarkus Integration': 'Deploy Water Framework applications with Quarkus.'
+            }
+        };
+        
+        return descriptions[sectionId]?.[subsectionTitle] || `Learn about ${subsectionTitle.toLowerCase()} in Water Framework.`;
+    }
+
+    initializeTOCItemHandlers() {
+        const tocItems = utils.getElements('.toc-item');
+        tocItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all menu items
+                utils.getElements(SELECTORS.MENU_ITEMS).forEach(menuItem => menuItem.classList.remove(CLASSES.ACTIVE));
+                utils.getElements(SELECTORS.SUBMENU_ITEMS).forEach(subItem => subItem.classList.remove(CLASSES.ACTIVE));
+                
+                // Find and activate the corresponding menu item
+                const href = item.getAttribute('data-href');
+                const remoteMd = item.getAttribute('data-remote');
+                const dataMd = item.getAttribute('data-md');
+                
+                let targetLink = utils.getElement(`a[href="${href}"]`);
+                if (targetLink) {
+                    targetLink.classList.add(CLASSES.ACTIVE);
+                    
+                    // Load the content
+                    if (remoteMd) {
+                        ContentLoader.loadRemoteContent(targetLink);
+                    } else if (dataMd) {
+                        ContentLoader.loadLocalContent(dataMd);
+                    }
+                }
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+            });
+        });
     }
 
     handleSubmenuVisibility(link) {
@@ -255,8 +422,21 @@ class MenuManager {
 
     initializeDocumentClick() {
         document.addEventListener('click', (e) => {
-            if (!e.target.closest(SELECTORS.SIDEBAR)) {
-                utils.log('Click outside sidebar, closing all submenus');
+            // Only close submenus if clicking on a menu item (to navigate to a different section)
+            // Don't close submenus when clicking on the content area
+            if (e.target.closest(SELECTORS.MENU_ITEMS) || e.target.closest(SELECTORS.SUBMENU_ITEMS)) {
+                // This will be handled by the individual menu item click handlers
+                return;
+            }
+            
+            // Don't close submenus when clicking on the content area
+            if (e.target.closest(SELECTORS.DOCS_CONTENT)) {
+                return;
+            }
+            
+            // Only close submenus when clicking outside both sidebar and content area
+            if (!e.target.closest(SELECTORS.SIDEBAR) && !e.target.closest(SELECTORS.DOCS_CONTENT)) {
+                utils.log('Click outside sidebar and content, closing all submenus');
                 this.closeAllSubmenus();
             }
         });
@@ -331,6 +511,12 @@ class ContentLoader {
     }
 
     static displayContent(text, container) {
+        // Check if content is empty or just whitespace
+        if (!text || text.trim() === '') {
+            container.innerHTML = this.createUnderConstructionContent();
+            return;
+        }
+
         const html = marked.parse(text);
         const contentWrapper = utils.createElement('div', 'markdown-content');
         contentWrapper.innerHTML = html;
@@ -373,10 +559,27 @@ class ContentLoader {
     static handleError(error, source) {
         utils.error('Error loading content:', error);
         const docsContent = utils.getElement(SELECTORS.DOCS_CONTENT);
-        docsContent.innerHTML = utils.createElement('div', CLASSES.ERROR, `
-            Failed to load content: ${error.message}<br>
-            Source: ${source}
-        `).outerHTML;
+        docsContent.innerHTML = this.createUnderConstructionContent();
+    }
+
+    static createUnderConstructionContent() {
+        return `
+            <div class="under-construction">
+                <div class="construction-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="#FFA500"/>
+                        <path d="M19 14L20.09 20.26L27 21L20.09 21.74L19 28L17.91 21.74L11 21L17.91 20.26L19 14Z" fill="#FFA500"/>
+                        <path d="M5 14L6.09 20.26L13 21L6.09 21.74L5 28L3.91 21.74L-3 21L3.91 20.26L5 14Z" fill="#FFA500"/>
+                        <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="#FFA500" opacity="0.3"/>
+                        <path d="M19 14L20.09 20.26L27 21L20.09 21.74L19 28L17.91 21.74L11 21L17.91 20.26L19 14Z" fill="#FFA500" opacity="0.3"/>
+                        <path d="M5 14L6.09 20.26L13 21L6.09 21.74L5 28L3.91 21.74L-3 21L3.91 20.26L5 14Z" fill="#FFA500" opacity="0.3"/>
+                    </svg>
+                </div>
+                <h2>🚧 Under Construction 🚧</h2>
+                <p>This section is currently being developed and will be available soon.</p>
+                <p>Please check back later for updates.</p>
+            </div>
+        `;
     }
 
     static highlightCodeBlocks(container) {
