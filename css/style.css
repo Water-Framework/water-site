@@ -449,29 +449,30 @@ footer {
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 80px);
+    min-height: calc(100vh - 80px);
     overflow: hidden;
 }
 
 .docs-container {
     display: flex;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    gap: 2rem;
     flex: 1;
-    height: 100%;
+    min-height: calc(100vh - 200px); /* Account for header and footer */
     overflow: hidden;
+    background-color: var(--background-color);
+    gap: 0;
 }
 
 .docs-sidebar {
-    flex: 0 0 250px;
-    height: calc(100vh - 120px);
+    width: 280px;
+    min-width: 280px;
+    height: calc(100vh - 200px); /* Account for header and footer */
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 1rem;
-    padding-bottom: 2rem;
-    align-self: flex-start;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    position: sticky;
+    top: 80px; /* Account for header height */
+    z-index: 100;
 }
 
 .docs-sidebar::-webkit-scrollbar {
@@ -537,22 +538,25 @@ footer {
     background-color: var(--hover-color);
 }
 
-/* Style for the Modules menu item */
-.docs-sidebar nav ul li > a[href="#modules"] {
+/* Style for sections with submenus */
+.docs-sidebar nav ul li:has(.sub-menu) > a {
     cursor: pointer;
     position: relative;
 }
 
-/* Add a visual indicator for submenu items */
-.docs-sidebar nav ul li > a[href="#modules"]::after {
-    content: '▼';
+/* Add a visual indicator for sections with submenus */
+.docs-sidebar nav ul li:has(.sub-menu) > a::after {
+    content: '▶';
     font-size: 0.8em;
     margin-left: 5px;
     transition: transform 0.3s ease;
+    color: var(--light-text);
 }
 
-.docs-sidebar nav ul li.show-submenu > a[href="#modules"]::after {
-    transform: rotate(180deg);
+.docs-sidebar nav ul li.show-submenu:has(.sub-menu) > a::after {
+    content: '▼';
+    transform: none;
+    color: var(--primary-color);
 }
 
 .docs-sidebar nav ul li a {
@@ -570,22 +574,88 @@ footer {
 }
 
 .docs-sidebar nav ul li a.active {
-    background-color: var(--primary-color);
-    color: white;
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: rgba(0, 102, 204, 0.1);
+    border-left: 3px solid var(--primary-color);
+    padding-left: calc(1rem - 3px);
+}
+
+/* Active submenu item styling */
+.docs-sidebar nav ul li .sub-menu a.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: rgba(0, 102, 204, 0.1);
+    border-left: 3px solid var(--primary-color);
+    padding-left: calc(1rem - 3px);
+}
+
+/* Ensure parent menu item is also highlighted when submenu item is active */
+.docs-sidebar nav ul li .sub-menu a.active ~ *,
+.docs-sidebar nav ul li .sub-menu a.active {
+    color: var(--primary-color);
+}
+
+/* Highlight parent menu when submenu item is active */
+.docs-sidebar nav ul li:has(.sub-menu a.active) > a {
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: rgba(0, 102, 204, 0.05);
+    border-left: 2px solid var(--primary-color);
+    padding-left: calc(1rem - 2px);
+}
+
+/* Ensure parent section is highlighted when it's directly active */
+.docs-sidebar nav ul li > a.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: rgba(0, 102, 204, 0.1);
+    border-left: 3px solid var(--primary-color);
+    padding-left: calc(1rem - 3px);
+}
+
+/* Active submenu item styling */
+.docs-sidebar nav ul li .sub-menu a.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: rgba(0, 102, 204, 0.1);
+    border-left: 3px solid var(--primary-color);
+    padding-left: calc(1rem - 3px);
+}
+
+/* Smooth transition for menu state changes */
+.docs-sidebar nav ul li a,
+.docs-sidebar nav ul li .sub-menu a {
+    transition: all 0.3s ease;
+}
+
+/* URL parameter indicator */
+.docs-sidebar nav ul li a[data-url-param]::after {
+    content: "🔗";
+    font-size: 0.8em;
+    margin-left: 0.5rem;
+    opacity: 0.7;
+}
+
+.docs-sidebar nav ul li a[data-url-param]:hover::after {
+    opacity: 1;
 }
 
 .docs-content {
     flex: 1;
     padding: 2rem;
-    padding-bottom: 4rem;
+    padding-bottom: 6rem; /* Increased bottom padding to prevent footer overlap */
     overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--background-color);
-    max-width: 1200px;
+    min-width: 1000px;
+    max-width: 1800px;
+    width: 100%;
     margin: 0 auto;
-    min-height: calc(100vh - 120px);
+    min-height: calc(100vh - 200px); /* Account for header and footer */
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 .docs-content::-webkit-scrollbar {
@@ -625,14 +695,16 @@ footer {
 
 .markdown-content {
     display: block;
-    padding: 1rem;
+    padding: 2rem;
     background-color: var(--background-color);
-    border-radius: 4px;
+    border-radius: 8px;
     line-height: 1.6;
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 0.95rem;
     height: 100%;
     overflow-y: auto;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .markdown-content:empty::before {
@@ -641,58 +713,66 @@ footer {
     text-align: center;
     color: var(--light-text);
     font-style: italic;
-    padding: 2rem;
+    padding: 3rem;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
+    font-size: 1rem;
 }
 
 .markdown-content h1 {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     color: var(--primary-color);
     margin-bottom: 2rem;
+    margin-top: 1rem;
     color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-color-light);
-    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--primary-color-light);
+    padding-bottom: 0.8rem;
+    font-weight: 700;
 }
 
 .markdown-content h2 {
-    font-size: 2rem;
-    margin: 2rem 0 1rem;
+    font-size: 1.8rem;
+    margin: 2rem 0 1.2rem;
     color: var(--primary-color);
     border-bottom: 2px solid var(--primary-color-light);
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.6rem;
+    font-weight: 600;
 }
 
 .markdown-content h3 {
     font-size: 1.5rem;
-    margin: 1.5rem 0 1rem;
+    margin: 1.8rem 0 1rem;
     color: var(--primary-color);
+    font-weight: 600;
 }
 
 .markdown-content h4 {
     font-size: 1.3rem;
-    margin: 1.3rem 0 0.8rem;
+    margin: 1.5rem 0 0.8rem;
     color: var(--primary-color);
+    font-weight: 600;
 }
 
 .markdown-content p {
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
     line-height: 1.6;
     color: var(--text-color);
+    font-size: 0.95rem;
 }
 
 .markdown-content ul, 
 .markdown-content ol {
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
     padding-left: 2rem;
 }
 
 .markdown-content li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
     line-height: 1.6;
+    font-size: 0.95rem;
 }
 
 .markdown-content pre {
@@ -800,48 +880,47 @@ footer {
 /* Responsive styles */
 @media (max-width: 768px) {
     .documentation {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        height: auto;
-        overflow: visible;
+        padding: 1rem;
+        min-height: calc(100vh - 80px);
     }
-    
+
     .docs-container {
         flex-direction: column;
-        padding: 1rem;
-        flex: 1;
-        height: auto;
-        overflow: visible;
+        min-height: calc(100vh - 200px);
     }
 
     .docs-sidebar {
-        position: static;
         width: 100%;
-        margin-bottom: 2rem;
-        height: auto;
-        max-height: 300px;
+        max-width: 100%;
+        position: fixed;
+        top: 60px;
+        left: -100%;
+        height: calc(100vh - 120px); /* Account for header and some footer space */
+        z-index: 999;
+        transition: left 0.3s ease;
+        background: white;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         overflow-y: auto;
         overflow-x: hidden;
+        padding: 1rem;
     }
 
     .docs-content {
+        margin-left: 0;
+        padding: 1rem;
         width: 100%;
         height: auto;
         overflow: visible;
-        flex: 1;
-        min-height: 400px;
     }
-    
+
     .markdown-content {
-        height: auto;
-        overflow: visible;
+        padding: 0.5rem;
+        font-size: 0.9rem;
     }
-    
+
     .markdown-content:empty::before {
-        position: static;
-        transform: none;
-        padding: 2rem;
+        padding: 1rem;
+        font-size: 0.9rem;
     }
 }
 
@@ -985,7 +1064,7 @@ footer {
         position: fixed;
         top: 60px;
         left: -100%;
-        height: calc(100vh - 60px);
+        height: calc(100vh - 120px); /* Account for header and some footer space */
         z-index: 999;
         transition: left 0.3s ease;
         background: white;
@@ -1305,13 +1384,14 @@ footer {
 
 /* Section Overview and TOC Styles */
 .section-overview {
-    max-width: 1000px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 2rem 0;
+    width: 100%;
 }
 
 .section-overview h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: var(--primary-color);
     margin-bottom: 1rem;
     text-align: center;
@@ -1319,12 +1399,12 @@ footer {
 }
 
 .section-description {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--light-text);
     text-align: center;
-    margin-bottom: 3rem;
-    line-height: 1.6;
-    max-width: 800px;
+    margin-bottom: 2.5rem;
+    line-height: 1.5;
+    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -1334,20 +1414,22 @@ footer {
     border-radius: 12px;
     padding: 2rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    width: 100%;
 }
 
 .section-toc h2 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: var(--text-color);
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     text-align: center;
     font-weight: bold;
 }
 
 .toc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1.5rem;
+    width: 100%;
 }
 
 .toc-item {
@@ -1356,13 +1438,14 @@ footer {
     padding: 1.5rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.2rem;
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     text-decoration: none;
     color: inherit;
+    min-height: 70px;
 }
 
 .toc-item:hover {
@@ -1387,17 +1470,18 @@ footer {
 
 .toc-content {
     flex: 1;
+    min-width: 0;
 }
 
 .toc-content h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--text-color);
     margin-bottom: 0.5rem;
     font-weight: 600;
 }
 
 .toc-content p {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--light-text);
     line-height: 1.4;
     margin: 0;
@@ -1420,32 +1504,37 @@ footer {
 @media (max-width: 768px) {
     .section-overview {
         padding: 1rem;
+        max-width: 100%;
     }
     
     .section-overview h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
     
     .section-description {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         margin-bottom: 2rem;
+        max-width: 100%;
     }
     
     .section-toc {
         padding: 1.5rem;
+        width: 100%;
     }
     
     .section-toc h2 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
     
     .toc-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+        width: 100%;
     }
     
     .toc-item {
-        padding: 1rem;
+        padding: 1.2rem;
+        min-height: 60px;
     }
     
     .toc-number {
@@ -1455,10 +1544,30 @@ footer {
     }
     
     .toc-content h3 {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
     
     .toc-content p {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
+}
+
+/* Ensure sidebar stays clean - hide any TOC content in sidebar */
+.docs-sidebar .section-toc,
+.docs-sidebar .section-overview,
+.docs-sidebar .toc-grid,
+.docs-sidebar .toc-item {
+    display: none !important;
+}
+
+/* URL parameter indicator */
+.docs-sidebar nav ul li a[data-url-param]::after {
+    content: "🔗";
+    font-size: 0.8em;
+    margin-left: 0.5rem;
+    opacity: 0.7;
+}
+
+.docs-sidebar nav ul li a[data-url-param]:hover::after {
+    opacity: 1;
 } 

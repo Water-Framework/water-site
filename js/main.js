@@ -39,6 +39,23 @@ const utils = {
 
     toggleClass: (element, className) => {
         element.classList.toggle(className);
+    },
+
+    // New utility function to get URL parameters
+    getUrlParameter: (name) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    },
+
+    // New utility function to update URL without page reload
+    updateUrlParameter: (name, value) => {
+        const url = new URL(window.location);
+        if (value) {
+            url.searchParams.set(name, value);
+        } else {
+            url.searchParams.delete(name);
+        }
+        window.history.pushState({}, '', url);
     }
 };
 
@@ -72,20 +89,22 @@ class MobileManager {
         const sidebarToggle = utils.getElement(SELECTORS.SIDEBAR_TOGGLE);
         const sidebar = utils.getElement(SELECTORS.SIDEBAR);
 
-        sidebarToggle.addEventListener('click', () => {
-            utils.toggleClass(sidebar, CLASSES.ACTIVE);
-            utils.toggleClass(sidebarToggle, CLASSES.ACTIVE);
-        });
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', () => {
+                utils.toggleClass(sidebar, CLASSES.ACTIVE);
+                utils.toggleClass(sidebarToggle, CLASSES.ACTIVE);
+            });
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && 
-                !e.target.closest(SELECTORS.SIDEBAR) && 
-                !e.target.closest(SELECTORS.SIDEBAR_TOGGLE)) {
-                sidebar.classList.remove(CLASSES.ACTIVE);
-                sidebarToggle.classList.remove(CLASSES.ACTIVE);
-            }
-        });
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    !e.target.closest(SELECTORS.SIDEBAR) && 
+                    !e.target.closest(SELECTORS.SIDEBAR_TOGGLE)) {
+                    sidebar.classList.remove(CLASSES.ACTIVE);
+                    sidebarToggle.classList.remove(CLASSES.ACTIVE);
+                }
+            });
+        }
     }
 
     initializeResizeHandler() {
@@ -97,8 +116,10 @@ class MobileManager {
                     // Reset mobile states when switching to desktop
                     utils.getElement(SELECTORS.NAV_LINKS).classList.remove(CLASSES.ACTIVE);
                     utils.getElement(SELECTORS.MOBILE_MENU_TOGGLE).classList.remove(CLASSES.ACTIVE);
-                    utils.getElement(SELECTORS.SIDEBAR).classList.remove(CLASSES.ACTIVE);
-                    utils.getElement(SELECTORS.SIDEBAR_TOGGLE).classList.remove(CLASSES.ACTIVE);
+                    const sidebar = utils.getElement(SELECTORS.SIDEBAR);
+                    const sidebarToggle = utils.getElement(SELECTORS.SIDEBAR_TOGGLE);
+                    if (sidebar) sidebar.classList.remove(CLASSES.ACTIVE);
+                    if (sidebarToggle) sidebarToggle.classList.remove(CLASSES.ACTIVE);
                 }
             }, 250);
         });
@@ -113,33 +134,179 @@ class MenuManager {
     }
 
     initializeDefaultSection() {
-        // Find and highlight the Introduction section by default
-        const introductionLink = utils.getElement('a[href="#introduction"]');
-        if (introductionLink) {
-            introductionLink.classList.add(CLASSES.ACTIVE);
-            // Load the introduction content
-            if (introductionLink.hasAttribute('data-md')) {
-                ContentLoader.loadLocalContent(introductionLink.getAttribute('data-md'));
-            }
+        // Check for page parameter first
+        const pageParam = utils.getUrlParameter('page');
+        
+        if (pageParam) {
+            this.loadSectionByPageParam(pageParam);
         } else {
-            // Fallback: if no introduction link found, try to load the first available section
-            const firstSectionLink = utils.getElement('a[data-md]');
-            if (firstSectionLink) {
-                firstSectionLink.classList.add(CLASSES.ACTIVE);
-                ContentLoader.loadLocalContent(firstSectionLink.getAttribute('data-md'));
+            // Find and highlight the Introduction section by default
+            const introductionLink = utils.getElement('a[href="#introduction"]');
+            if (introductionLink) {
+                this.selectMenuItemAndLoadContent(introductionLink);
+            } else {
+                // Fallback: if no introduction link found, try to load the first available section
+                const firstSectionLink = utils.getElement('a[data-md]');
+                if (firstSectionLink) {
+                    this.selectMenuItemAndLoadContent(firstSectionLink);
+                }
             }
         }
     }
 
+    loadSectionByPageParam(pageParam) {
+        utils.log('Loading section by page parameter:', pageParam);
+        
+        // Find the menu item that matches the page parameter
+        const targetLink = utils.getElement(`a[href="#${pageParam}"]`);
+        
+        if (targetLink) {
+            utils.log('Found target link:', targetLink.textContent);
+            this.selectMenuItemAndLoadContent(targetLink);
+        } else {
+            utils.log('Page parameter not found:', pageParam);
+            // Try to find a similar link or fallback to default behavior
+            const fallbackLink = this.findFallbackLink(pageParam);
+            if (fallbackLink) {
+                utils.log('Using fallback link:', fallbackLink.textContent);
+                this.selectMenuItemAndLoadContent(fallbackLink);
+            } else {
+                // Fallback to default behavior
+                this.initializeDefaultSection();
+            }
+        }
+    }
+
+    findFallbackLink(pageParam) {
+        // Try to find a link that contains the page parameter in its href
+        const allLinks = utils.getElements('a[href*="#"]');
+        for (const link of allLinks) {
+            const href = link.getAttribute('href');
+            if (href.includes(pageParam) || href.toLowerCase().includes(pageParam.toLowerCase())) {
+                return link;
+            }
+        }
+        return null;
+    }
+
+    // Unified function to handle menu selection and content loading
+    selectMenuItemAndLoadContent(link) {
+        utils.log('=== selectMenuItemAndLoadContent START ===');
+        utils.log('Selecting menu item:', link.textContent);
+        utils.log('Link href:', link.getAttribute('href'));
+        utils.log('Link element:', link);
+        utils.log('Link parent:', link.parentElement);
+        utils.log('Link is submenu item:', !!link.closest('.sub-menu'));
+        
+        // Activate the menu item (this handles menu highlighting and submenu opening)
+        this.activateMenuItem(link);
+        
+        // Load content based on the link type
+        if (link.hasAttribute('data-md')) {
+            const dataMd = link.getAttribute('data-md');
+            utils.log('Loading local content:', dataMd);
+            ContentLoader.loadLocalContent(dataMd);
+        } else if (link.hasAttribute('remote-md')) {
+            const remoteMd = link.getAttribute('remote-md');
+            utils.log('Loading remote content:', remoteMd);
+            ContentLoader.loadRemoteContent(link);
+        } else {
+            // If no content attribute, check if it's a section with submenu
+            const parentLi = link.parentElement;
+            const submenu = parentLi.querySelector('.sub-menu');
+            if (submenu) {
+                utils.log('No content attributes found, but section has submenu - generating overview');
+                this.generateSectionOverview(link, submenu);
+            } else {
+                utils.log('No content found for link, showing under construction');
+                const docsContent = utils.getElement(SELECTORS.DOCS_CONTENT);
+                docsContent.innerHTML = ContentLoader.createUnderConstructionContent();
+            }
+        }
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
+        
+        utils.log('=== selectMenuItemAndLoadContent END ===');
+    }
+
+    activateMenuItem(link) {
+        utils.log('=== activateMenuItem START ===');
+        utils.log('Activating menu item:', link.textContent);
+        utils.log('Link href:', link.getAttribute('href'));
+        
+        // Remove active class from all menu items
+        const menuItems = utils.getElements(SELECTORS.MENU_ITEMS);
+        const submenuItems = utils.getElements(SELECTORS.SUBMENU_ITEMS);
+        
+        utils.log('Removing active class from menu items:', menuItems.length);
+        utils.log('Removing active class from submenu items:', submenuItems.length);
+        
+        menuItems.forEach(item => {
+            item.classList.remove(CLASSES.ACTIVE);
+        });
+        submenuItems.forEach(item => {
+            item.classList.remove(CLASSES.ACTIVE);
+        });
+        
+        // Add active class to target link
+        utils.log('Adding active class to target link:', link.textContent);
+        link.classList.add(CLASSES.ACTIVE);
+        utils.log('Target link classes after adding active:', link.classList.toString());
+        
+        // Open parent submenu if it's a submenu item
+        const submenu = link.closest('.sub-menu');
+        if (submenu) {
+            utils.log('Link is in submenu, opening parent submenu');
+            const parentLi = submenu.parentElement;
+            parentLi.classList.add(CLASSES.SHOW_SUBMENU);
+            utils.log('Parent li classes after adding show-submenu:', parentLi.classList.toString());
+            
+            // Also highlight the parent section menu item
+            const parentLink = parentLi.children[0]; // Get the first child (should be the anchor)
+            if (parentLink && parentLink.tagName === 'A') {
+                utils.log('Highlighting parent section menu item:', parentLink.textContent);
+                parentLink.classList.add(CLASSES.ACTIVE);
+                utils.log('Parent link classes after adding active:', parentLink.classList.toString());
+            } else {
+                utils.log('Parent link not found or not an anchor');
+            }
+        } else {
+            utils.log('Link is not in submenu');
+        }
+        
+        // Update URL parameter
+        const sectionId = link.getAttribute('href').substring(1); // Remove the #
+        utils.log('Updating URL parameter with sectionId:', sectionId);
+        utils.updateUrlParameter('page', sectionId);
+        
+        utils.log('=== activateMenuItem END ===');
+    }
+
     initializeEventListeners() {
-        this.initializeSubmenuItems();
-        this.initializeTopMenuItems();
-        this.initializeDocumentClick();
+        // Add a small delay to ensure DOM is fully ready
+        setTimeout(() => {
+            this.initializeSubmenuItems();
+            this.initializeTopMenuItems();
+            this.initializeDocumentClick();
+        }, 100);
     }
 
     initializeSubmenuItems() {
         const subMenuLinks = utils.getElements(SELECTORS.SUBMENU_ITEMS);
         utils.log('Found submenu links:', subMenuLinks.length);
+        
+        // Log all found submenu links for debugging
+        subMenuLinks.forEach((link, index) => {
+            utils.log(`Submenu link ${index + 1}:`, {
+                text: link.textContent.trim(),
+                href: link.getAttribute('href'),
+                hasDataMd: link.hasAttribute('data-md'),
+                hasRemoteMd: link.hasAttribute('remote-md'),
+                dataMd: link.getAttribute('data-md'),
+                remoteMd: link.getAttribute('remote-md')
+            });
+        });
 
         subMenuLinks.forEach(link => {
             this.setupSubmenuItem(link);
@@ -149,40 +316,31 @@ class MenuManager {
     setupSubmenuItem(link) {
         utils.log('Adding click handler to:', link.textContent);
         
-        // Remove any existing click handlers
-        link.replaceWith(link.cloneNode(true));
+        // Remove any existing click handlers by cloning
+        const newLink = link.cloneNode(true);
+        link.parentNode.replaceChild(newLink, link);
         
-        // Get the fresh reference after cloning
-        const freshLink = utils.getElement(`.sub-menu a[href="${link.getAttribute('href')}"]`);
+        // Add the click handler to the new link
+        newLink.addEventListener('click', (e) => this.handleSubmenuItemClick(e, newLink));
         
-        // Add the click handler
-        freshLink.addEventListener('click', (e) => this.handleSubmenuItemClick(e, freshLink));
+        utils.log('Click handler added successfully to:', newLink.textContent);
     }
 
     handleSubmenuItemClick(e, link) {
         e.preventDefault();
         e.stopPropagation();
         
+        utils.log('=== handleSubmenuItemClick START ===');
         utils.log('Direct click on:', link.textContent);
+        utils.log('Link href:', link.getAttribute('href'));
         utils.log('Remote MD:', link.getAttribute('remote-md'));
+        utils.log('Data MD:', link.getAttribute('data-md'));
+        utils.log('Link element:', link);
         
-        // Remove active class from all menu items
-        utils.getElements(SELECTORS.MENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
-        utils.getElements(SELECTORS.SUBMENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
+        // Use the unified function to handle menu selection and content loading
+        this.selectMenuItemAndLoadContent(link);
         
-        // Add active class to clicked item
-        link.classList.add(CLASSES.ACTIVE);
-        
-        // Load remote markdown content
-        ContentLoader.loadRemoteContent(link);
-        
-        // Keep only the current submenu open
-        const currentSubmenu = link.closest('.sub-menu');
-        const parentLi = currentSubmenu.parentElement;
-        parentLi.classList.add(CLASSES.SHOW_SUBMENU);
-        
-        // Scroll to top of the page
-        window.scrollTo(0, 0);
+        utils.log('=== handleSubmenuItemClick END ===');
     }
 
     initializeTopMenuItems() {
@@ -206,42 +364,38 @@ class MenuManager {
         
         utils.log('Top menu click on:', link.textContent);
         
-        // Remove active class from all menu items
-        utils.getElements(SELECTORS.MENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
-        utils.getElements(SELECTORS.SUBMENU_ITEMS).forEach(item => item.classList.remove(CLASSES.ACTIVE));
-        
-        // Add active class to clicked item
-        link.classList.add(CLASSES.ACTIVE);
-        
-        // Check if this section has subsections
+        // Check if this is a section with submenu
         const parentLi = link.parentElement;
-        const subMenu = parentLi.querySelector('.sub-menu');
+        const submenu = parentLi.querySelector('.sub-menu');
         
-        if (subMenu && subMenu.children.length > 0) {
-            // Generate TOC content for sections with subsections
-            this.generateSectionTOC(link, subMenu);
-        } else if (link.hasAttribute('data-md')) {
-            // Load local content for sections without subsections
-            utils.log('Data MD:', link.getAttribute('data-md'));
-            ContentLoader.loadLocalContent(link.getAttribute('data-md'));
+        if (submenu) {
+            // This is a section with submenu - activate the parent section and show overview
+            utils.log('Section has submenu, activating parent and showing overview');
+            this.activateMenuItem(link);
+            this.handleSubmenuVisibility(link);
+            
+            // Generate and display section overview in main content area
+            this.generateSectionOverview(link, submenu);
+        } else {
+            // This is a direct link - activate it and load content
+            utils.log('Direct link, loading content');
+            this.selectMenuItemAndLoadContent(link);
         }
-        
-        this.handleSubmenuVisibility(link);
-        
-        // Scroll to top of the page
-        window.scrollTo(0, 0);
     }
 
-    generateSectionTOC(sectionLink, subMenu) {
-        const sectionTitle = sectionLink.textContent;
+    generateSectionOverview(sectionLink, subMenu) {
+        const sectionTitle = sectionLink.textContent.trim();
         const sectionId = sectionLink.getAttribute('href').substring(1);
-        const subMenuItems = Array.from(subMenu.querySelectorAll('a'));
         
-        // Get section descriptions from a mapping
-        const sectionDescriptions = this.getSectionDescriptions();
-        const description = sectionDescriptions[sectionId] || `Explore the ${sectionTitle.toLowerCase()} concepts and features of Water Framework.`;
+        // Clean up any existing TOC content in the sidebar
+        this.cleanupSidebarTOC();
         
-        let tocHTML = `
+        // Get section description
+        const description = this.getSectionDescriptions()[sectionId] || 
+                          this.getSubsectionDescription(sectionTitle, sectionId);
+        
+        // Create overview HTML
+        let overviewHTML = `
             <div class="section-overview">
                 <h1>${sectionTitle}</h1>
                 <p class="section-description">${description}</p>
@@ -251,13 +405,15 @@ class MenuManager {
                     <div class="toc-grid">
         `;
         
+        // Add TOC items for each subsection
+        const subMenuItems = subMenu.querySelectorAll('a');
         subMenuItems.forEach((item, index) => {
             const itemTitle = item.textContent;
             const itemHref = item.getAttribute('href');
             const hasRemoteMd = item.hasAttribute('remote-md');
             const hasDataMd = item.hasAttribute('data-md');
             
-            tocHTML += `
+            overviewHTML += `
                 <div class="toc-item" data-href="${itemHref}" data-remote="${hasRemoteMd ? item.getAttribute('remote-md') : ''}" data-md="${hasDataMd ? item.getAttribute('data-md') : ''}">
                     <div class="toc-number">${(index + 1).toString().padStart(2, '0')}</div>
                     <div class="toc-content">
@@ -271,180 +427,190 @@ class MenuManager {
             `;
         });
         
-        tocHTML += `
+        overviewHTML += `
                     </div>
                 </div>
             </div>
         `;
         
+        // Display in main content area
         const docsContent = utils.getElement(SELECTORS.DOCS_CONTENT);
-        docsContent.innerHTML = tocHTML;
+        docsContent.innerHTML = overviewHTML;
         
-        // Add click handlers to TOC items
-        this.initializeTOCItemHandlers();
+        // Add click handlers to TOC items with a small delay to ensure DOM is ready
+        setTimeout(() => {
+            this.initializeTOCItemHandlers();
+        }, 50);
+    }
+
+    cleanupSidebarTOC() {
+        // Remove any existing TOC content from the sidebar
+        const existingTOC = utils.getElements('.section-toc');
+        existingTOC.forEach(toc => {
+            if (toc.closest('.docs-sidebar')) {
+                toc.remove();
+            }
+        });
+    }
+
+    generateSectionTOC(sectionLink, subMenu) {
+        // This method is now deprecated - use generateSectionOverview instead
+        // Keeping for backward compatibility but it should not be called
+        utils.log('generateSectionTOC is deprecated - use generateSectionOverview instead');
     }
 
     getSectionDescriptions() {
         return {
-            'basic-concepts': 'Core concepts and fundamental building blocks of Water Framework, including service architecture, entity management, security, and component lifecycle.',
-            'persistence': 'Comprehensive data access and persistence layer providing JPA repository framework, query system, and entity extensions.',
-            'permission': 'Advanced permission system for fine-grained access control, role management, and custom permission checking.',
-            'rest-api': 'REST API framework for building web services with security, documentation, and versioning capabilities.',
-            'architecture': 'System architecture overview, component interaction flows, and security patterns for enterprise applications.',
-            'clustering': 'Clustering and distributed computing capabilities for high availability and scalability.',
-            'microservices': 'Microservices architecture support including service discovery, mesh integration, and distributed tracing.',
-            'best-practices': 'Development patterns, testing strategies, and performance optimization guidelines.',
-            'implementations': 'Framework implementations for Spring, OSGi, and Quarkus with integration examples.',
-            'modules': 'Ready-to-use modules providing authentication, document management, blockchain integration, and more.'
+            'basic-concepts': 'Core concepts and fundamental building blocks of the Water Framework.',
+            'persistence': 'Data persistence and repository patterns for managing entities.',
+            'permission': 'Security and permission management system.',
+            'rest-api': 'REST API development and integration patterns.',
+            'architecture': 'System architecture and design patterns.',
+            'clustering': 'Clustering and distributed system capabilities.',
+            'microservices': 'Microservices architecture and patterns.',
+            'best-practices': 'Development best practices and guidelines.',
+            'implementations': 'Framework implementations for different platforms.',
+            'modules': 'Available modules and their capabilities.'
         };
     }
 
     getSubsectionDescription(subsectionTitle, sectionId) {
         const descriptions = {
-            'basic-concepts': {
-                'Service Architecture': 'Learn about the service layer architecture and API design patterns.',
-                'Entity Management': 'Understand entity lifecycle, validation, and management patterns.',
-                'Water Resources and Entities': 'Explore resource management and entity relationships.',
-                'Shared Entities': 'Discover how to work with shared and collaborative entities.',
-                'Validation': 'Implement comprehensive validation strategies for your entities.',
-                'Event Management': 'Handle events and notifications in your applications.',
-                'Security & Permissions': 'Implement fine-grained security and permission controls.',
-                'Component Lifecycle': 'Manage component initialization, activation, and cleanup.',
-                'Interceptors & AOP': 'Use aspect-oriented programming for cross-cutting concerns.'
-            },
-            'persistence': {
-                'JPA Repository Framework': 'Core repository pattern implementation with transaction management.',
-                'Query & Filter System': 'Powerful query building and filtering capabilities.',
-                'Entity Extensions & Validation': 'Extend entities with custom functionality and validation.'
-            },
-            'permission': {
-                'Permission Annotations Management': 'Learn how to use permission annotations for automatic access control.',
-                'Defining Roles and Permission for Your Entities': 'Configure roles and permissions for your domain entities.',
-                'Custom Checking Permissions': 'Implement custom permission checking logic for complex scenarios.',
-                'Custom Permission Manager': 'Create custom permission managers for specialized access control needs.'
-            },
-            'rest-api': {
-                'REST Service Layer': 'Build RESTful web services with automatic endpoint generation.',
-                'REST Security & Integration': 'Secure your REST APIs with authentication and authorization.',
-                'API Documentation & Versioning': 'Generate API documentation and manage versioning.'
-            },
-            'architecture': {
-                'System Architecture Overview': 'High-level system architecture and design principles.',
-                'Component Interaction Flows': 'Understand how components communicate and interact.',
-                'Security & Permission Flows': 'Security patterns and permission checking flows.'
-            },
-            'clustering': {
-                'Clustering Overview': 'Introduction to clustering concepts and capabilities.',
-                'Distributed Components': 'Build and deploy distributed components.',
-                'Cluster Coordination': 'Coordinate activities across cluster nodes.'
-            },
-            'microservices': {
-                'Microservices Overview': 'Microservices architecture and design patterns.',
-                'Service Discovery': 'Discover and register services in a distributed environment.',
-                'Service Mesh Integration': 'Integrate with service mesh technologies.',
-                'Distributed Tracing': 'Trace requests across microservice boundaries.'
-            },
-            'best-practices': {
-                'Development Patterns': 'Recommended development patterns and practices.',
-                'Testing Strategies': 'Comprehensive testing approaches and strategies.',
-                'Performance & Scalability': 'Optimize performance and ensure scalability.'
-            },
-            'implementations': {
-                'Spring Integration': 'Integrate Water Framework with Spring Boot applications.',
-                'OSGi Integration': 'Use Water Framework in OSGi environments.',
-                'Quarkus Integration': 'Deploy Water Framework applications with Quarkus.'
-            }
+            'service-architecture': 'Understanding the service-oriented architecture of Water Framework.',
+            'entity-management': 'How to manage entities and their lifecycle.',
+            'water-resources-entities': 'Core resource and entity concepts.',
+            'shared-entities': 'Sharing entities between users and organizations.',
+            'validation': 'Data validation and business rule enforcement.',
+            'event-management': 'Event-driven architecture and messaging.',
+            'security-permissions': 'Security model and permission system.',
+            'component-lifecycle': 'Component lifecycle management and dependency injection.',
+            'interceptors-aop': 'Aspect-oriented programming with interceptors.',
+            'jpa-repository': 'JPA-based repository implementation.',
+            'query-filter-system': 'Advanced querying and filtering capabilities.',
+            'entity-extensions': 'Extending entities with custom functionality.',
+            'permission-annotations': 'Using annotations for permission management.',
+            'defining-roles-permissions': 'Defining roles and permissions for entities.',
+            'custom-checking-permissions': 'Creating custom permission managers.',
+            'rest-service-layer': 'Building REST services with Water Framework.',
+            'rest-security': 'Securing REST APIs and integration patterns.',
+            'api-documentation': 'API documentation and versioning strategies.',
+            'system-architecture': 'High-level system architecture overview.',
+            'component-interaction': 'How components interact and communicate.',
+            'security-flows': 'Security and permission flow patterns.',
+            'clustering-overview': 'Clustering architecture and benefits.',
+            'distributed-components': 'Distributed component patterns.',
+            'cluster-coordination': 'Cluster coordination and synchronization.',
+            'microservices-overview': 'Microservices architecture patterns.',
+            'service-discovery': 'Service discovery and registration.',
+            'service-mesh': 'Service mesh integration patterns.',
+            'distributed-tracing': 'Distributed tracing and observability.',
+            'development-patterns': 'Recommended development patterns.',
+            'testing-strategies': 'Testing strategies and best practices.',
+            'performance-scalability': 'Performance optimization and scalability.',
+            'spring-integration': 'Spring Framework integration.',
+            'osgi-integration': 'OSGi container integration.',
+            'quarkus-integration': 'Quarkus framework integration.'
         };
         
-        return descriptions[sectionId]?.[subsectionTitle] || `Learn about ${subsectionTitle.toLowerCase()} in Water Framework.`;
+        // Try to find the description by the subsection title (converted to key format)
+        const key = subsectionTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        return descriptions[key] || `Learn about ${subsectionTitle.toLowerCase()}.`;
     }
 
     initializeTOCItemHandlers() {
         const tocItems = utils.getElements('.toc-item');
-        tocItems.forEach(item => {
+        utils.log('=== initializeTOCItemHandlers START ===');
+        utils.log('Found TOC items:', tocItems.length);
+        
+        tocItems.forEach((item, index) => {
+            utils.log(`TOC item ${index + 1}:`, {
+                text: item.querySelector('.toc-content h3')?.textContent,
+                href: item.getAttribute('data-href'),
+                remoteMd: item.getAttribute('data-remote'),
+                dataMd: item.getAttribute('data-md')
+            });
+            
             item.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 
-                // Remove active class from all menu items
-                utils.getElements(SELECTORS.MENU_ITEMS).forEach(menuItem => menuItem.classList.remove(CLASSES.ACTIVE));
-                utils.getElements(SELECTORS.SUBMENU_ITEMS).forEach(subItem => subItem.classList.remove(CLASSES.ACTIVE));
+                utils.log('=== TOC Item Click START ===');
+                utils.log('Clicked TOC item:', item.querySelector('.toc-content h3')?.textContent);
                 
-                // Find and activate the corresponding menu item
+                // Find the corresponding menu item
                 const href = item.getAttribute('data-href');
                 const remoteMd = item.getAttribute('data-remote');
                 const dataMd = item.getAttribute('data-md');
                 
+                utils.log('TOC item data:', { href, remoteMd, dataMd });
+                
                 let targetLink = utils.getElement(`a[href="${href}"]`);
+                utils.log('Target link found:', targetLink);
+                utils.log('Target link text:', targetLink?.textContent);
+                utils.log('Target link href:', targetLink?.getAttribute('href'));
+                
                 if (targetLink) {
-                    targetLink.classList.add(CLASSES.ACTIVE);
-                    
-                    // Load the content
-                    if (remoteMd) {
-                        ContentLoader.loadRemoteContent(targetLink);
-                    } else if (dataMd) {
-                        ContentLoader.loadLocalContent(dataMd);
-                    }
+                    utils.log('Calling selectMenuItemAndLoadContent with target link');
+                    // Use the unified function to handle menu selection and content loading
+                    this.selectMenuItemAndLoadContent(targetLink);
+                } else {
+                    utils.log('Target link not found for href:', href);
+                    utils.log('All available links with href:', href);
+                    const allLinks = utils.getElements('a');
+                    allLinks.forEach(link => {
+                        if (link.getAttribute('href') === href) {
+                            utils.log('Found matching link:', link.textContent);
+                        }
+                    });
                 }
                 
-                // Scroll to top
-                window.scrollTo(0, 0);
+                utils.log('=== TOC Item Click END ===');
             });
         });
+        
+        utils.log('=== initializeTOCItemHandlers END ===');
     }
 
     handleSubmenuVisibility(link) {
         const parentLi = link.parentElement;
-        const subMenu = parentLi.querySelector('.sub-menu');
+        const currentSubmenu = parentLi.querySelector('.sub-menu');
         
-        if (subMenu) {
-            utils.log('Found submenu for:', link.textContent);
+        if (currentSubmenu) {
+            // Close all other submenus first
             this.closeSiblingSubmenus(parentLi);
+            
+            // Toggle current submenu
             this.toggleSubmenu(parentLi);
-        } else {
-            utils.log('No submenu found for:', link.textContent);
-            this.closeSiblingSubmenus(parentLi);
         }
     }
 
     closeSiblingSubmenus(currentLi) {
-        const siblings = Array.from(currentLi.parentElement.children);
-        siblings.forEach(sibling => {
-            if (sibling !== currentLi && sibling.querySelector('.sub-menu')) {
-                sibling.classList.remove(CLASSES.SHOW_SUBMENU);
+        const siblingLis = currentLi.parentElement.children;
+        Array.from(siblingLis).forEach(li => {
+            if (li !== currentLi) {
+                li.classList.remove(CLASSES.SHOW_SUBMENU);
             }
         });
     }
 
     toggleSubmenu(parentLi) {
         parentLi.classList.toggle(CLASSES.SHOW_SUBMENU);
-        utils.log('Submenu visibility toggled:', parentLi.classList.contains(CLASSES.SHOW_SUBMENU));
     }
 
     initializeDocumentClick() {
         document.addEventListener('click', (e) => {
-            // Only close submenus if clicking on a menu item (to navigate to a different section)
-            // Don't close submenus when clicking on the content area
-            if (e.target.closest(SELECTORS.MENU_ITEMS) || e.target.closest(SELECTORS.SUBMENU_ITEMS)) {
-                // This will be handled by the individual menu item click handlers
-                return;
-            }
-            
-            // Don't close submenus when clicking on the content area
-            if (e.target.closest(SELECTORS.DOCS_CONTENT)) {
-                return;
-            }
-            
-            // Only close submenus when clicking outside both sidebar and content area
-            if (!e.target.closest(SELECTORS.SIDEBAR) && !e.target.closest(SELECTORS.DOCS_CONTENT)) {
-                utils.log('Click outside sidebar and content, closing all submenus');
+            // Close submenus when clicking outside
+            if (!e.target.closest('.docs-sidebar')) {
                 this.closeAllSubmenus();
             }
         });
     }
 
     closeAllSubmenus() {
-        utils.getElements(SELECTORS.MENU_ITEMS).forEach(item => {
-            item.parentElement.classList.remove(CLASSES.SHOW_SUBMENU);
+        const submenus = utils.getElements('.sub-menu');
+        submenus.forEach(submenu => {
+            const parentLi = submenu.parentElement;
+            parentLi.classList.remove(CLASSES.SHOW_SUBMENU);
         });
     }
 }
