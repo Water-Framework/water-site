@@ -1,0 +1,7 @@
+# Python dependencies for Water Framework website
+# Currently using only built-in Python modules (http.server, socketserver)
+# Add any additional dependencies here if needed in the future
+
+# Example dependencies (commented out):
+# flask==2.3.3
+# gunicorn==21.2.0 
