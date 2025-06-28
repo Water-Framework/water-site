@@ -1,0 +1,9 @@
+# Water Framework Security Policy
+# This file provides security researchers with information about our security disclosure policy
+
+Contact: mailto:aristide.cittadino@gmail.com
+Expires: 2025-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://water-framework.github.io/water-site/.well-known/security.txt
+Policy: https://water-framework.github.io/water-site/security-policy
+Hiring: https://github.com/Water-Framework/water-framework/issues 
