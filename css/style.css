@@ -1106,13 +1106,18 @@ footer {
         transition: all 0.3s ease;
     }
 
+    /* Desktop Toggle Button - Hidden on mobile */
+    .desktop-toggle {
+        display: none;
+    }
+
     .sidebar-toggle:hover {
-        background: #f5f5f5;
+        background: white;
     }
 
     .sidebar-toggle.active {
-        background: var(--primary-color);
-        color: white;
+        background: white;
+        color: var(--primary-color);
     }
 
     /* Content Adjustments */
@@ -1179,6 +1184,68 @@ footer {
         height: 40px;
         bottom: 15px;
         right: 15px;
+    }
+}
+
+/* Desktop Sidebar Behavior */
+@media (min-width: 769px) {
+    .docs-sidebar {
+        position: sticky;
+        top: 80px;
+        left: 0;
+        width: 300px;
+        height: calc(100vh - 120px);
+        transform: none;
+        transition: transform 0.3s ease;
+        z-index: 100;
+    }
+
+    .docs-sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+
+    .docs-content {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+        transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+
+    .docs-content.expanded {
+        margin-left: 20px;
+        width: calc(100% - 40px);
+    }
+
+    /* Desktop Toggle Button - Fixed position outside sidebar */
+    .desktop-toggle {
+        display: flex;
+        position: fixed;
+        top: 90px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 4px;
+        border: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 101;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .desktop-toggle:hover {
+        background: var(--primary-color);
+    }
+
+    .desktop-toggle.active {
+        background: var(--primary-color);
+    }
+
+    /* Mobile Toggle Button - Hidden on desktop */
+    .mobile-toggle {
+        display: none;
     }
 }
 

@@ -86,25 +86,57 @@ class MobileManager {
     }
 
     initializeSidebarToggle() {
-        const sidebarToggle = utils.getElement(SELECTORS.SIDEBAR_TOGGLE);
+        const mobileToggle = utils.getElement('.mobile-toggle');
+        const desktopToggle = utils.getElement('.desktop-toggle');
         const sidebar = utils.getElement(SELECTORS.SIDEBAR);
 
-        if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', () => {
-                utils.toggleClass(sidebar, CLASSES.ACTIVE);
-                utils.toggleClass(sidebarToggle, CLASSES.ACTIVE);
-            });
+        // Function to toggle sidebar
+        const toggleSidebar = () => {
+            utils.toggleClass(sidebar, CLASSES.ACTIVE);
+            if (mobileToggle) utils.toggleClass(mobileToggle, CLASSES.ACTIVE);
+            if (desktopToggle) utils.toggleClass(desktopToggle, CLASSES.ACTIVE);
+        };
 
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768 && 
-                    !e.target.closest(SELECTORS.SIDEBAR) && 
-                    !e.target.closest(SELECTORS.SIDEBAR_TOGGLE)) {
-                    sidebar.classList.remove(CLASSES.ACTIVE);
-                    sidebarToggle.classList.remove(CLASSES.ACTIVE);
+        // Add event listeners for both toggle buttons
+        if (mobileToggle && sidebar) {
+            mobileToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSidebar();
+            });
+        }
+
+        if (desktopToggle && sidebar) {
+            desktopToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Desktop behavior: collapse/expand sidebar
+                if (window.innerWidth > 768) {
+                    utils.toggleClass(sidebar, 'collapsed');
+                    utils.toggleClass(desktopToggle, CLASSES.ACTIVE);
+                    
+                    // Also toggle content area
+                    const docsContent = utils.getElement('.docs-content');
+                    if (docsContent) {
+                        utils.toggleClass(docsContent, 'expanded');
+                    }
+                } else {
+                    // Mobile behavior: show/hide sidebar
+                    toggleSidebar();
                 }
             });
         }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !e.target.closest(SELECTORS.SIDEBAR) && 
+                !e.target.closest('.mobile-toggle')) {
+                sidebar.classList.remove(CLASSES.ACTIVE);
+                if (mobileToggle) mobileToggle.classList.remove(CLASSES.ACTIVE);
+            }
+        });
     }
 
     initializeResizeHandler() {
@@ -117,9 +149,18 @@ class MobileManager {
                     utils.getElement(SELECTORS.NAV_LINKS).classList.remove(CLASSES.ACTIVE);
                     utils.getElement(SELECTORS.MOBILE_MENU_TOGGLE).classList.remove(CLASSES.ACTIVE);
                     const sidebar = utils.getElement(SELECTORS.SIDEBAR);
-                    const sidebarToggle = utils.getElement(SELECTORS.SIDEBAR_TOGGLE);
+                    const mobileToggle = utils.getElement('.mobile-toggle');
+                    const desktopToggle = utils.getElement('.desktop-toggle');
+                    const docsContent = utils.getElement('.docs-content');
+                    
+                    // Reset mobile sidebar state
                     if (sidebar) sidebar.classList.remove(CLASSES.ACTIVE);
-                    if (sidebarToggle) sidebarToggle.classList.remove(CLASSES.ACTIVE);
+                    if (mobileToggle) mobileToggle.classList.remove(CLASSES.ACTIVE);
+                    
+                    // Reset desktop sidebar state (expand by default)
+                    if (sidebar) sidebar.classList.remove('collapsed');
+                    if (desktopToggle) desktopToggle.classList.remove(CLASSES.ACTIVE);
+                    if (docsContent) docsContent.classList.remove('expanded');
                 }
             }, 250);
         });
