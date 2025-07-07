@@ -804,6 +804,16 @@ class ContentLoader {
 // Initialize when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     utils.log('DOM fully loaded');
-    new MenuManager();
-    new MobileManager();
+    
+    // Initialize MenuManager (for documentation pages)
+    if (utils.getElement('.docs-sidebar') || utils.getElement('.docs-content')) {
+        utils.log('Initializing MenuManager for documentation page');
+        new MenuManager();
+    }
+    
+    // Initialize MobileManager (for pages with mobile menu)
+    if (utils.getElement('.mobile-menu-toggle') || utils.getElement('.mobile-toggle')) {
+        utils.log('Initializing MobileManager for mobile functionality');
+        new MobileManager();
+    }
 });
