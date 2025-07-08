@@ -476,7 +476,10 @@ class MenuManager {
         
         // Display in main content area
         const docsContent = utils.getElement(SELECTORS.DOCS_CONTENT);
-        docsContent.innerHTML = overviewHTML;
+        const contentWrapper = utils.createElement('div', 'markdown-content');
+        contentWrapper.innerHTML = overviewHTML;
+        docsContent.innerHTML = '';
+        docsContent.appendChild(contentWrapper);
         
         // Add click handlers to TOC items with a small delay to ensure DOM is ready
         setTimeout(() => {
@@ -720,7 +723,10 @@ class ContentLoader {
     static displayContent(text, container) {
         // Check if content is empty or just whitespace
         if (!text || text.trim() === '') {
-            container.innerHTML = this.createUnderConstructionContent();
+            const contentWrapper = utils.createElement('div', 'markdown-content');
+            contentWrapper.innerHTML = this.createUnderConstructionContent();
+            container.innerHTML = '';
+            container.appendChild(contentWrapper);
             return;
         }
 
@@ -766,7 +772,10 @@ class ContentLoader {
     static handleError(error, source) {
         utils.error('Error loading content:', error);
         const docsContent = utils.getElement(SELECTORS.DOCS_CONTENT);
-        docsContent.innerHTML = this.createUnderConstructionContent();
+        const contentWrapper = utils.createElement('div', 'markdown-content');
+        contentWrapper.innerHTML = this.createUnderConstructionContent();
+        docsContent.innerHTML = '';
+        docsContent.appendChild(contentWrapper);
     }
 
     static createUnderConstructionContent() {

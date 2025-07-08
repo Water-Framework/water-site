@@ -1205,14 +1205,34 @@ footer {
     }
 
     .docs-content {
-        margin-left: 320px;
-        width: calc(100% - 320px);
+        margin-left: 120px;
+        width: calc(100% - 120px);
         transition: margin-left 0.3s ease, width 0.3s ease;
+        padding-left: 3rem;
+        padding-right: 3rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .docs-content .markdown-content {
+        max-width: 800px;
+        width: 100%;
+    }
+
+    .docs-content .markdown-content,
+    .docs-content .section-overview,
+    .docs-content .section-toc {
+        max-width: 1200px;
+        width: 100%;
     }
 
     .docs-content.expanded {
-        margin-left: 20px;
+        margin-left: auto;
+        margin-right: auto;
         width: calc(100% - 40px);
+        max-width: 1400px;
+        padding-left: 3rem;
+        padding-right: 3rem;
     }
 
     /* Desktop Toggle Button - Fixed position outside sidebar */
