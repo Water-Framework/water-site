@@ -648,7 +648,7 @@ footer {
     overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--background-color);
-    min-width: 1000px;
+    min-width: 0;
     max-width: 1800px;
     width: 100%;
     margin: 0 auto;
@@ -1079,11 +1079,12 @@ footer {
     }
 
     .docs-content {
-        margin-left: 0;
+        margin-left: 0 !important;
         padding: 1rem;
-        width: 100%;
+        width: 100% !important;
         height: auto;
         overflow: visible;
+        display: block !important;
     }
 
     /* Mobile Sidebar Toggle */
