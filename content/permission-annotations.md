@@ -69,7 +69,7 @@ public interface PermissionManager extends Service {
     boolean checkPermission(String username, Resource entity, Action action);
     boolean checkPermission(String username, Class<? extends Resource> resource, Action action);
     boolean checkPermission(String username, String resourceName, Action action);
-    boolean checkPermissionAndOwnership(String username, String resourceName, Action action, Resource... entities);
+    boolean checkPermissionAndOwnership(String username, String re@sourceName, Action action, Resource... entities);
     boolean checkPermissionAndOwnership(String username, Resource resource, Action action, Resource... entities);
     boolean checkUserOwnsResource(User user, Object resource);
     Map<String, Map<String, Map<String, Boolean>>> entityPermissionMap(String username, Map<String, List<Long>> entityPks);
