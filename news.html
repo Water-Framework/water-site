@@ -142,11 +142,42 @@
     <!-- Main Content -->
     <main class="news">
         <section class="news-header">
-            <h1>News & Updates</h1>
+            <h1>News &amp; Updates</h1>
             <p>Stay up to date with the latest news and developments</p>
         </section>
 
         <div class="news-container">
+
+            <article class="news-item featured-news">
+                <div class="news-tag ai-tag"><i class="fas fa-robot"></i> AI Integration</div>
+                <h2>Water Framework Goes AI-Ready: Claude Code + yo water Integration</h2>
+                <div class="date">March 2026</div>
+                <p>Water Framework 3.x introduces first-class <strong>AI-assisted development</strong> support. By combining the structured <code>yo water</code> Yeoman generator with <strong>Claude Code</strong>, developers can now scaffold, extend, and test entire microservices in minutes — not hours.</p>
+                <p>What's new:</p>
+                <ul>
+                    <li><strong>CLAUDE.md per module</strong> — deep AI context files for every module ensure accurate, pattern-consistent code generation</li>
+                    <li><strong>Service Mesh wiring via AI</strong> — Claude Code manages <code>waterDescriptor</code> output and input PINs automatically</li>
+                    <li><strong>Integration client modules</strong> — standalone REST clients for User, Permission, and SharedEntity remote calls</li>
+                    <li><strong>service-discovery PIN convention</strong> — every REST-exposing module now declares the <code>standardPin 'service-discovery'</code> for automatic service mesh registration</li>
+                    <li><strong>API Gateway + Service Discovery</strong> — complete service mesh with dynamic routing, circuit breaker, rate limiting, and load balancing</li>
+                </ul>
+                <p>The generator-first + AI-first approach means enterprise microservices now have a true <strong>10x productivity multiplier</strong>: what used to take a full sprint of boilerplate can now be scaffolded in a single AI-assisted session.</p>
+                <a href="documentation.html?page=ai-powered-development" class="read-more">Explore AI-Powered Development <i class="fas fa-arrow-right"></i></a>
+            </article>
+
+            <article class="news-item">
+                <div class="news-tag"><i class="fas fa-network-wired"></i> Service Mesh</div>
+                <h2>API Gateway and Service Discovery Modules Released</h2>
+                <div class="date">February 2026</div>
+                <p>Water Framework now ships two new production-ready infrastructure modules that complete the service mesh story:</p>
+                <ul>
+                    <li><strong>ApiGateway</strong> — reverse proxy with dynamic route management, circuit breaker, rate limiting, and load balancing. All routes and rate-limit rules are managed via REST CRUD APIs.</li>
+                    <li><strong>ServiceDiscovery</strong> — in-memory service registry where every REST-exposing module auto-registers at startup via the <code>standardPin 'service-discovery'</code> input PIN declaration.</li>
+                </ul>
+                <p>Combined, these modules give Water-based platforms a complete, self-wiring service mesh without any external infrastructure requirements.</p>
+                <a href="documentation.html?page=service-mesh-integration" class="read-more">Learn about Service Mesh <i class="fas fa-arrow-right"></i></a>
+            </article>
+
             <article class="news-item">
                 <h2>Water Framework 3.0.0 Released</h2>
                 <div class="date">March 15, 2024</div>
@@ -157,8 +188,10 @@
                     <li>New security features and improvements</li>
                     <li>Better integration with Spring Boot and OSGi</li>
                     <li>Improved documentation and examples</li>
+                    <li>Multi-runtime support: Spring Boot 3.x, Apache Karaf OSGi, Quarkus</li>
+                    <li>Full Karate integration testing framework adoption</li>
                 </ul>
-                <a href="#" class="read-more">Read More</a>
+                <a href="https://github.com/Water-Framework" class="read-more" target="_blank" rel="noopener noreferrer">View on GitHub <i class="fas fa-arrow-right"></i></a>
             </article>
 
         </div>
@@ -169,11 +202,12 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h4>Water Framework</h4>
-                <p>A modern Java framework for building enterprise applications</p>
+                <p>The AI-ready enterprise Java framework for building microservices at speed.</p>
             </div>
             <div class="footer-section">
                 <h4>Quick Links</h4>
                 <ul>
+                    <li><a href="documentation.html?page=ai-powered-development">AI-Powered Dev</a></li>
                     <li><a href="documentation.html?page=getting-started">Getting Started</a></li>
                     <li><a href="documentation.html">Documentation</a></li>
                     <li><a href="news.html">News</a></li>
@@ -189,7 +223,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Water Framework. All rights reserved.</p>
+            <p>&copy; 2026 Water Framework. All rights reserved.</p>
         </div>
     </footer>
 </body>

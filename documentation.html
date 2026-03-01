@@ -3,39 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <!-- Primary Meta Tags -->
     <title>Documentation - Water Framework | Complete Guide & API Reference</title>
     <meta name="title" content="Documentation - Water Framework | Complete Guide & API Reference">
-    <meta name="description" content="Comprehensive documentation for the Water Framework, a modern Java framework for building enterprise applications. Complete guides, API reference, tutorials, and best practices.">
-    <meta name="keywords" content="Water Framework documentation, Java framework docs, enterprise application guide, DDD documentation, microservices tutorial, Spring integration, OSGi guide, Quarkus integration">
+    <meta name="description" content="Comprehensive documentation for the Water Framework, an AI-ready enterprise Java framework. Complete guides, API reference, tutorials, service mesh wiring, and generator documentation.">
+    <meta name="keywords" content="Water Framework documentation, Java framework docs, AI-ready framework, yo water generator, Claude Code, enterprise application guide, DDD, microservices, Spring, OSGi, Quarkus">
     <meta name="author" content="aristide.cittadino@gmail.com">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://water-framework.github.io/water-site/documentation.html">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://water-framework.github.io/water-site/documentation.html">
     <meta property="og:title" content="Documentation - Water Framework | Complete Guide & API Reference">
-    <meta property="og:description" content="Comprehensive documentation for the Water Framework, a modern Java framework for building enterprise applications. Complete guides, API reference, tutorials, and best practices.">
+    <meta property="og:description" content="Comprehensive documentation for the Water Framework, an AI-ready enterprise Java framework.">
     <meta property="og:image" content="https://water-framework.github.io/water-site/images/water-framework-docs-og.png">
     <meta property="og:site_name" content="Water Framework">
     <meta property="og:locale" content="en_US">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://water-framework.github.io/water-site/documentation.html">
     <meta property="twitter:title" content="Documentation - Water Framework | Complete Guide & API Reference">
-    <meta property="twitter:description" content="Comprehensive documentation for the Water Framework, a modern Java framework for building enterprise applications. Complete guides, API reference, tutorials, and best practices.">
+    <meta property="twitter:description" content="Comprehensive documentation for the Water Framework, an AI-ready enterprise Java framework.">
     <meta property="twitter:image" content="https://water-framework.github.io/water-site/images/water-framework-docs-og.png">
-    
+
     <!-- Additional Meta Tags -->
     <meta name="theme-color" content="#0066cc">
     <meta name="msapplication-TileColor" content="#0066cc">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Water Framework Docs">
-    
+
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,28 +45,28 @@
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    
+
     <!-- Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
-    
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
-    
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="js/main.js"></script>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    
+
     <!-- Web App Manifest -->
     <link rel="manifest" href="manifest.json">
-    
+
 </head>
 <body>
     <!-- Header -->
@@ -106,6 +106,15 @@
                         <!-- Getting Started Section -->
                         <li><a href="#getting-started" data-md="getting-started.md">Getting Started</a></li>
 
+                        <!-- AI-Powered Development Section -->
+                        <li>
+                            <a href="#ai-powered-development"><i class="fas fa-robot sidebar-icon"></i> AI-Powered Dev</a>
+                            <ul class="sub-menu">
+                                <li><a href="#ai-productivity" data-md="ai-productivity.md">Claude Code + yo water</a></li>
+                                <li><a href="#generator-reference" data-md="generator-reference.md">Generator Reference</a></li>
+                            </ul>
+                        </li>
+
                         <!-- Basic Concepts Section -->
                         <li>
                             <a href="#basic-concepts">Basic Concepts</a>
@@ -116,9 +125,9 @@
                                 <li><a href="#shared-entities" data-md="shared-entities.md">Shared Entities</a></li>
                                 <li><a href="#validation" data-md="validation.md">Validation</a></li>
                                 <li><a href="#event-management" data-md="event-management.md">Event Management</a></li>
-                                <li><a href="#security-permissions" data-md="security-permissions.md">Security & Permissions</a></li>
+                                <li><a href="#security-permissions" data-md="security-permissions.md">Security &amp; Permissions</a></li>
                                 <li><a href="#component-lifecycle" data-md="component-lifecycle.md">Component Lifecycle</a></li>
-                                <li><a href="#interceptors-aop" data-md="interceptors-aop.md">Interceptors & AOP</a></li>
+                                <li><a href="#interceptors-aop" data-md="interceptors-aop.md">Interceptors &amp; AOP</a></li>
                             </ul>
                         </li>
 
@@ -127,8 +136,8 @@
                             <a href="#persistence">Persistence</a>
                             <ul class="sub-menu">
                                 <li><a href="#jpa-repository" data-md="jpa-repository.md">JPA Repository Framework</a></li>
-                                <li><a href="#query-filter-system" data-md="query-system.md">Query & Filter System</a></li>
-                                <li><a href="#entity-extensions" data-md="entity-extension.md">Entity Extensions & Validation</a></li>
+                                <li><a href="#query-filter-system" data-md="query-system.md">Query &amp; Filter System</a></li>
+                                <li><a href="#entity-extensions" data-md="entity-extension.md">Entity Extensions &amp; Validation</a></li>
                             </ul>
                         </li>
 
@@ -137,22 +146,41 @@
                             <a href="#permission">Permission</a>
                             <ul class="sub-menu">
                                 <li><a href="#permission-annotations" data-md="permission-annotations.md">Permission Annotations Management</a></li>
-                                <li><a href="#defining-roles-permissions" data-md="defining-roles-permissions.md">Defining Roles and Permission for Your Entities</a></li>
+                                <li><a href="#defining-roles-permissions" data-md="defining-roles-permissions.md">Defining Roles and Permissions</a></li>
                                 <li><a href="#custom-checking-permissions" data-md="custom-checking-permissions.md">Custom Checking Permissions</a></li>
                             </ul>
                         </li>
 
-                         <!-- REST API Section -->
-                         <li>
-                            <a href="#rest-api">REST Api</a>
+                        <!-- REST API Section -->
+                        <li>
+                            <a href="#rest-api">REST API</a>
                             <ul class="sub-menu">
                                 <li><a href="#rest-service-layer" data-md="rest-service-layer.md">REST Service Layer</a></li>
-                                <li><a href="#rest-security" data-md="rest-security.md">REST Security & Integration</a></li>
-                                <li><a href="#api-documentation" data-md="api-documentation.md">API Documentation & Versioning</a></li>
+                                <li><a href="#rest-security" data-md="rest-security.md">REST Security &amp; Integration</a></li>
+                                <li><a href="#api-documentation" data-md="api-documentation.md">API Documentation &amp; Versioning</a></li>
                             </ul>
                         </li>
 
-                       
+                        <!-- Service Mesh Section -->
+                        <li>
+                            <a href="#service-mesh-integration"><i class="fas fa-project-diagram sidebar-icon"></i> Service Mesh</a>
+                            <ul class="sub-menu">
+                                <li><a href="#service-mesh" data-md="service-mesh.md">Service Mesh Wiring</a></li>
+                                <li><a href="#api-gateway" remote-md="https://raw.githubusercontent.com/Water-Framework/ApiGateway/refs/heads/main/README.md">API Gateway</a></li>
+                                <li><a href="#service-discovery" remote-md="https://raw.githubusercontent.com/Water-Framework/ServiceDiscovery/refs/heads/main/README.md">Service Discovery</a></li>
+                                <li><a href="#integration-clients" data-md="integration-clients.md">Integration Clients</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Microservices Section -->
+                        <li>
+                            <a href="#microservices">Microservices</a>
+                            <ul class="sub-menu">
+                                <li><a href="#microservices-overview" data-md="microservices-overview.md">Microservices Overview</a></li>
+                                <li><a href="#distributed-tracing" data-md="distributed-tracing.md">Distributed Tracing</a></li>
+                            </ul>
+                        </li>
+
                         <!-- Clustering Section -->
                         <li>
                             <a href="#clustering">Clustering</a>
@@ -161,17 +189,6 @@
                                 <li><a href="#cluster-coordination" data-md="cluster-coordination.md">Cluster Coordination</a></li>
                             </ul>
                         </li>
-
-                        <!-- Microservices Section -->
-                        <!--<li>
-                            <a href="#microservices">Microservices</a>
-                            <ul class="sub-menu">
-                                <li><a href="#microservices-overview" data-md="microservices-overview.md">Microservices Overview</a></li>
-                                <li><a href="#service-discovery" data-md="service-discovery.md">Service Discovery</a></li>
-                                <li><a href="#service-mesh" data-md="service-mesh.md">Service Mesh Integration</a></li>
-                                <li><a href="#distributed-tracing" data-md="distributed-tracing.md">Distributed Tracing</a></li>
-                            </ul>
-                        </li>-->
 
                         <!-- Best Practices Section -->
                         <li>
@@ -196,23 +213,35 @@
                         <li>
                             <a href="#modules">Modules</a>
                             <ul class="sub-menu">
-                                <li><a href="#authentication" remote-md="https://raw.githubusercontent.com/Water-Framework/Authentication/refs/heads/main/README.md">Authentication</a></li>
-                                <li><a href="#company" remote-md="https://raw.githubusercontent.com/Water-Framework/Company/refs/heads/main/README.md">Company</a></li>
+                                <!-- Core & Foundation -->
                                 <li><a href="#core" remote-md="https://raw.githubusercontent.com/water-framework/core/refs/heads/main/README.md">Core</a></li>
-                                <li><a href="#distribution" remote-md="https://raw.githubusercontent.com/Water-Framework/Distribution/refs/heads/main/README.md">Distribution</a></li>
-                                <li><a href="#documents-manager" remote-md="https://raw.githubusercontent.com/Water-Framework/DocumentsManager/refs/heads/main/README.md">Documents Manager</a></li>
-                                <li><a href="#email" remote-md="https://raw.githubusercontent.com/Water-Framework/Email/refs/heads/main/README.md">Email</a></li>
-                                <li><a href="#ethereum-connector" remote-md="https://raw.githubusercontent.com/Water-Framework/EthereumConnector/refs/heads/main/README.md">Ethereum Connector</a></li>
-                                <li><a href="#hadoop-connector" remote-md="https://raw.githubusercontent.com/Water-Framework/HadoopConnector/refs/heads/main/README.md">Hadoop Connector</a></li>
                                 <li><a href="#implementation" remote-md="https://raw.githubusercontent.com/Water-Framework/Implementation/refs/heads/main/README.md">Implementation</a></li>
-                                <li><a href="#jpa-repository" remote-md="https://raw.githubusercontent.com/Water-Framework/JpaRepository/refs/heads/main/README.md">JPA Repository</a></li>
-                                <li><a href="#permission" remote-md="https://raw.githubusercontent.com/Water-Framework/Permission/refs/heads/main/README.md">Permission</a></li>
                                 <li><a href="#repository" remote-md="https://raw.githubusercontent.com/Water-Framework/Repository/refs/heads/main/README.md">Repository</a></li>
+                                <li><a href="#jpa-repository-module" remote-md="https://raw.githubusercontent.com/Water-Framework/JpaRepository/refs/heads/main/README.md">JPA Repository</a></li>
                                 <li><a href="#rest" remote-md="https://raw.githubusercontent.com/Water-Framework/Rest/refs/heads/main/README.md">REST</a></li>
-                                <li><a href="#role" remote-md="https://raw.githubusercontent.com/Water-Framework/Role/refs/heads/main/README.md">Role</a></li>
-                                <li><a href="#shared-entity" remote-md="https://raw.githubusercontent.com/Water-Framework/SharedEntity/refs/heads/main/README.md">Shared Entity</a></li>
-                                <li><a href="#storage-s3" remote-md="https://raw.githubusercontent.com/Water-Framework/StorageS3/refs/heads/main/README.md">Storage S3</a></li>
+                                <li><a href="#distribution" remote-md="https://raw.githubusercontent.com/Water-Framework/Distribution/refs/heads/main/README.md">Distribution</a></li>
+                                <!-- Identity & Access -->
+                                <li><a href="#authentication" remote-md="https://raw.githubusercontent.com/Water-Framework/Authentication/refs/heads/main/README.md">Authentication</a></li>
                                 <li><a href="#user" remote-md="https://raw.githubusercontent.com/Water-Framework/User/refs/heads/main/README.md">User</a></li>
+                                <li><a href="#role" remote-md="https://raw.githubusercontent.com/Water-Framework/Role/refs/heads/main/README.md">Role</a></li>
+                                <li><a href="#permission" remote-md="https://raw.githubusercontent.com/Water-Framework/Permission/refs/heads/main/README.md">Permission</a></li>
+                                <li><a href="#shared-entity" remote-md="https://raw.githubusercontent.com/Water-Framework/SharedEntity/refs/heads/main/README.md">Shared Entity</a></li>
+                                <li><a href="#company" remote-md="https://raw.githubusercontent.com/Water-Framework/Company/refs/heads/main/README.md">Company</a></li>
+                                <!-- Service Mesh -->
+                                <li><a href="#api-gateway" remote-md="https://raw.githubusercontent.com/Water-Framework/ApiGateway/refs/heads/main/README.md">API Gateway</a></li>
+                                <li><a href="#service-discovery" remote-md="https://raw.githubusercontent.com/Water-Framework/ServiceDiscovery/refs/heads/main/README.md">Service Discovery</a></li>
+                                <!-- Integration Clients -->
+                                <li><a href="#user-integration" remote-md="https://raw.githubusercontent.com/Water-Framework/User/refs/heads/main/README.md">User Integration Client</a></li>
+                                <li><a href="#permission-integration" remote-md="https://raw.githubusercontent.com/Water-Framework/Permission/refs/heads/main/README.md">Permission Integration Client</a></li>
+                                <li><a href="#sharedentity-integration" remote-md="https://raw.githubusercontent.com/Water-Framework/SharedEntity/refs/heads/main/README.md">SharedEntity Integration Client</a></li>
+                                <!-- Connectors -->
+                                <li><a href="#email" remote-md="https://raw.githubusercontent.com/Water-Framework/Email/refs/heads/main/README.md">Email</a></li>
+                                <li><a href="#documents-manager" remote-md="https://raw.githubusercontent.com/Water-Framework/DocumentsManager/refs/heads/main/README.md">Documents Manager</a></li>
+                                <li><a href="#storage-s3" remote-md="https://raw.githubusercontent.com/Water-Framework/StorageS3/refs/heads/main/README.md">Storage S3</a></li>
+                                <li><a href="#ethereum-connector" remote-md="https://raw.githubusercontent.com/Water-Framework/EthereumConnector/refs/heads/main/README.md">Ethereum Connector</a></li>
+                                <li><a href="#kafka-connector" remote-md="https://raw.githubusercontent.com/Water-Framework/KafkaConnector/refs/heads/main/README.md">Kafka Connector</a></li>
+                                <li><a href="#hadoop-connector" remote-md="https://raw.githubusercontent.com/Water-Framework/HadoopConnector/refs/heads/main/README.md">Hadoop Connector</a></li>
+                                <li><a href="#zookeeper-connector" remote-md="https://raw.githubusercontent.com/Water-Framework/ZookeeperConnector/refs/heads/main/README.md">Zookeeper Connector</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -236,11 +265,12 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h4>Water Framework</h4>
-                <p>A modern Java framework for building enterprise applications</p>
+                <p>The AI-ready enterprise Java framework for building microservices at speed.</p>
             </div>
             <div class="footer-section">
                 <h4>Quick Links</h4>
                 <ul>
+                    <li><a href="documentation.html?page=ai-powered-development">AI-Powered Dev</a></li>
                     <li><a href="documentation.html?page=getting-started">Getting Started</a></li>
                     <li><a href="documentation.html">Documentation</a></li>
                     <li><a href="news.html">News</a></li>
@@ -256,8 +286,8 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Water Framework. All rights reserved.</p>
+            <p>&copy; 2026 Water Framework. All rights reserved.</p>
         </div>
     </footer>
 </body>
-</html> 
+</html>

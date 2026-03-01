@@ -505,16 +505,18 @@ class MenuManager {
 
     getSectionDescriptions() {
         return {
+            'ai-powered-development': 'Supercharge development velocity with Claude Code and the yo water Yeoman generator. Build microservices in minutes.',
             'basic-concepts': 'Core concepts and fundamental building blocks of the Water Framework.',
             'persistence': 'Data persistence and repository patterns for managing entities.',
             'permission': 'Security and permission management system.',
             'rest-api': 'REST API development and integration patterns.',
             'architecture': 'System architecture and design patterns.',
+            'service-mesh-integration': 'Service mesh wiring, API Gateway, Service Discovery, and integration clients.',
             'clustering': 'Clustering and distributed system capabilities.',
             'microservices': 'Microservices architecture and patterns.',
             'best-practices': 'Development best practices and guidelines.',
             'implementations': 'Framework implementations for different platforms.',
-            'modules': 'Available modules and their capabilities.'
+            'modules': 'All available Water Framework modules — core, security, service mesh, and connectors.'
         };
     }
 
@@ -545,8 +547,12 @@ class MenuManager {
             'distributed-components': 'Distributed component patterns.',
             'cluster-coordination': 'Cluster coordination and synchronization.',
             'microservices-overview': 'Microservices architecture patterns.',
-            'service-discovery': 'Service discovery and registration.',
-            'service-mesh': 'Service mesh integration patterns.',
+            'ai-productivity': 'Scaffold and build microservices with Claude Code and the yo water generator.',
+            'generator-reference': 'Complete reference for all yo water generator commands.',
+            'service-mesh': 'Declarative service mesh wiring with waterDescriptor output and input PINs.',
+            'api-gateway': 'API Gateway module: dynamic routing, circuit breaker, rate limiting, and load balancing.',
+            'service-discovery': 'Service Discovery: dynamic service registration and resolution across the Water mesh.',
+            'integration-clients': 'Remote integration clients for cross-service communication via REST.',
             'distributed-tracing': 'Distributed tracing and observability.',
             'development-patterns': 'Recommended development patterns.',
             'testing-strategies': 'Testing strategies and best practices.',
