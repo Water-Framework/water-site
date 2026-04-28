@@ -46,7 +46,7 @@ Standard PINs are predefined shorthand aliases for common Water integration cont
 
 | Standard PIN | Full ID | Provider |
 |---|---|---|
-| `jdbc` | `it.water.persistence.jdbc` | Any JDBC DataSource |
+| `jdbc` | `it.water.data.persistence` | Any JDBC DataSource |
 | `service-discovery` | `it.water.service-discovery` | ServiceDiscovery module |
 | `authentication-issuer` | `it.water.integration.authentication-issuer` | Authentication module |
 | `api-gateway` | `it.water.api-gateway` | ApiGateway module |
